@@ -2,7 +2,11 @@
 // gl_renderer.rs - Renderer based on SDL2 and OpenGL
 
 use crate::{Game, LitError, Renderer};
-use sdl2::{event::Event, video::{GLContext, GLProfile, Window}, Sdl};
+use sdl2::{
+    event::Event,
+    video::{GLContext, GLProfile, Window},
+    Sdl,
+};
 use std::os::raw::c_void;
 
 pub struct GlRenderer {
@@ -19,14 +23,17 @@ impl GlRenderer {
 
         // access the video subsystem
         let video_context = sdl_context.video().map_err(|e| LitError::Msg(e))?;
-       
+
         // set OpenGL options
         let gl_attr = video_context.gl_attr();
         gl_attr.set_context_profile(GLProfile::Core);
         gl_attr.set_context_version(3, 3);
 
         // create the window
-        let window = video_context.window("Lost in Time", 800, 600).opengl().build()?;
+        let window = video_context
+            .window("Lost in Time", 800, 600)
+            .opengl()
+            .build()?;
 
         // create the OpenGL context
         let gl_context = window.gl_create_context().map_err(|e| LitError::Msg(e))?;
@@ -59,7 +66,7 @@ impl Renderer for GlRenderer {
                     _ => {}
                 }
             }
- 
+
             unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
 
             self.window.gl_swap_window();
