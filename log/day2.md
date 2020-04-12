@@ -48,7 +48,7 @@ FromUtf8(#[from] FromUtf8Error),
 
 *Inside of src/script/bytecode.rs*
 
-```
+```rust
 use crate::LitError;
 use std::io::prelude::*;
 
@@ -59,14 +59,14 @@ pub trait Bytecode: Sized {
 
 *Inside of src/script/mod.rs*
 
-```
+```rust
 mod bytecode;
 pub use bytecode::Bytecode;
 ```
 
 *Modifications to src/main.rs*
 
-```
+```rust
 mod script;
 ```
 
@@ -83,7 +83,7 @@ We can implement most of these:
 
 *Inside of src/script/types.rs*
 
-```
+```rust
 use super::Bytecode;
 use crate::LitError;
 use std::io::prelude::*;
@@ -191,7 +191,7 @@ impl Bytecode for BytecodeObject {
 
 *Modifications to src/script/mod.rs*
 
-```
+```rust
 mod types;
 pub use types::{BytecodeObject, DataType};
 ```
@@ -200,7 +200,7 @@ Now that we have a good way of reading objects from bytecode, we now need to be 
 
 *Modifications to src/script/mod.rs*
 
-```
+```rust
 use std::collections::HashMap;
 use super::LitError;
 
@@ -429,7 +429,7 @@ GameData { name: "Hello world!" }
 
 Now that we have an interpreter for the bytecode, I figure that it's time to write the compiler that actually generates that bytecode. Since LostInTime will have no need of a compiler during its runtime, it makes sense to make this compiler its own separate crate.
 
-```
+```bash
 $ cargo new --bin lits-cc
 $ cd lits-cc
 ```
