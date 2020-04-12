@@ -10,7 +10,11 @@ mod types;
 pub use types::{BytecodeObject, DataType};
 
 use super::LitError;
-use std::{collections::HashMap, io::prelude::*};
+use std::{
+    collections::HashMap,
+    io::prelude::*,
+    sync::{Arc, Mutex},
+};
 
 pub struct ParserState {
     variables: HashMap<u32, BytecodeObject>,
@@ -32,6 +36,10 @@ impl ParserState {
             .get(&index)
             .ok_or_else(|| LitError::VariableNotFound(index))
     }
+}
+
+lazy_static::lazy_static! {
+    pub static ref PARSER_STATE: Arc<Mutex<ParserState>> = Arc::new(Mutex::new(ParserState::new()));
 }
 
 #[derive(Debug)]
@@ -58,9 +66,15 @@ impl GameData {
 impl Bytecode for GameData {
     fn read<T: Read>(stream: &mut T) -> Result<Self, LitError> {
         let mut data = Self::new();
-        let mut parse = ParserState::new();
 
-        while let Ok(()) = eval::eval(stream, &mut parse, &mut data) {} // go until error is encountered
+        /*loop {
+            if let Err(e) = eval::eval(stream, &mut data) {
+                eprintln!("Error encountered: {}", e);
+                break;
+            } // go until error is encountered
+        }*/
+
+        while let Ok(()) = eval::eval(stream, &mut data) {}
 
         Ok(data)
     }

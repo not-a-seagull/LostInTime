@@ -1,9 +1,9 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // script/types.rs - Types used in bytecode reading.
 
-use super::{Bytecode, ParserState};
+use super::{Bytecode, PARSER_STATE};
 use crate::LitError;
-use std::io::prelude::*;
+use std::{borrow::Cow, fmt, io::prelude::*};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataType {
@@ -26,50 +26,62 @@ pub enum BytecodeObject {
 
 impl BytecodeObject {
     #[inline]
-    pub fn data_type(&self, state: &ParserState) -> DataType {
+    pub fn data_type(&self) -> DataType {
         match self {
             &BytecodeObject::Numeric8(_) => DataType::Numeric8,
             &BytecodeObject::Numeric16(_) => DataType::Numeric16,
             &BytecodeObject::Numeric32(_) => DataType::Numeric32,
             &BytecodeObject::Str(_) => DataType::Str,
             &BytecodeObject::Tuple(_) => DataType::Tuple,
-            &BytecodeObject::VarInvocation(i) => state.get_variable(i).unwrap().data_type(state),
+            &BytecodeObject::VarInvocation(i) => PARSER_STATE
+                .lock()
+                .unwrap()
+                .get_variable(i)
+                .unwrap()
+                .data_type(),
         }
     }
 
-    pub fn as_number(&self, state: &ParserState) -> Result<i32, LitError> {
+    pub fn as_number(&self) -> Result<i32, LitError> {
         match self {
             &BytecodeObject::Numeric8(v) => Ok(v as i32),
             &BytecodeObject::Numeric16(v) => Ok(v as i32),
             &BytecodeObject::Numeric32(v) => Ok(v),
             &BytecodeObject::VarInvocation(i) => {
-                let val = state.get_variable(i)?;
-                val.as_number(state)
+                let parser_state = PARSER_STATE.lock()?;
+                let val = parser_state.get_variable(i)?;
+                val.as_number()
             }
-            _ => Err(LitError::ExpectedNumericalDataType(self.data_type(state))),
+            _ => Err(LitError::ExpectedNumericalDataType(self.data_type())),
         }
     }
 
-    pub fn as_string<'a>(&'a self, state: &'a ParserState) -> Result<&'a str, LitError> {
+    pub fn as_string<'a>(&'a self) -> Result<Cow<'a, str>, LitError> {
         match self {
-            &BytecodeObject::Str(ref s) => Ok(s),
-            &BytecodeObject::VarInvocation(i) => state.get_variable(i)?.as_string(state),
-            _ => Err(LitError::IncorrectDataType(
-                self.data_type(state),
-                DataType::Str,
-            )),
+            &BytecodeObject::Str(ref s) => Ok(Cow::Borrowed(s)),
+            &BytecodeObject::VarInvocation(i) => {
+                let parser_state = PARSER_STATE.lock()?;
+                match parser_state.get_variable(i)?.as_string() {
+                    Ok(s) => Ok(Cow::Owned(String::from(s))),
+                    Err(e) => Err(e),
+                }
+            }
+            _ => Err(LitError::IncorrectDataType(self.data_type(), DataType::Str)),
         }
     }
 
-    pub fn as_tuple<'a>(
-        &'a self,
-        state: &'a ParserState,
-    ) -> Result<&'a [BytecodeObject], LitError> {
+    pub fn as_tuple<'a>(&'a self) -> Result<Cow<'a, [BytecodeObject]>, LitError> {
         match self {
-            &BytecodeObject::Tuple(ref t) => Ok(t),
-            &BytecodeObject::VarInvocation(i) => state.get_variable(i)?.as_tuple(state),
+            &BytecodeObject::Tuple(ref t) => Ok(Cow::Borrowed(t)),
+            &BytecodeObject::VarInvocation(i) => {
+                let parser_state = PARSER_STATE.lock()?;
+                match parser_state.get_variable(i)?.as_tuple() {
+                    Ok(s) => Ok(Cow::Owned(s.into_owned())),
+                    Err(e) => Err(e),
+                }
+            }
             _ => Err(LitError::IncorrectDataType(
-                self.data_type(state),
+                self.data_type(),
                 DataType::Tuple,
             )),
         }
@@ -140,6 +152,21 @@ impl Bytecode for BytecodeObject {
                 Ok(BytecodeObject::VarInvocation(val))
             }
             _ => Err(LitError::BytecodeRead8(buffer[0])),
+        }
+    }
+}
+
+impl fmt::Display for BytecodeObject {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &BytecodeObject::Numeric8(u) => write!(f, "{}", u),
+            &BytecodeObject::Numeric16(u) => write!(f, "{}", u),
+            &BytecodeObject::Numeric32(u) => write!(f, "{}", u),
+            &BytecodeObject::Str(ref u) => write!(f, "{}", u),
+            &BytecodeObject::Tuple(ref s) => write!(f, "{:?}", s),
+            &BytecodeObject::VarInvocation(u) => {
+                Self::fmt(PARSER_STATE.lock().unwrap().get_variable(u).unwrap(), f)
+            }
         }
     }
 }

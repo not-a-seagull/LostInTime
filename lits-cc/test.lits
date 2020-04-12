@@ -1,1 +1,4 @@
-gamedef "Hello world!"
+gamedef "Lost in Time"                # define this game as "Lost in Time"
+def MY_VAR 1                          # define MY_VAR as being equal to one
+log "MY_VAR is equal to {}" (@MY_VAR) # print "MY_VAR is equal to 1" to the console
+# just a comment

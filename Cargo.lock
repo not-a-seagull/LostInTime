@@ -105,6 +105,7 @@ name = "lost_in_time"
 version = "0.1.0"
 dependencies = [
  "gl",
+ "lazy_static",
  "nalgebra",
  "sdl2",
  "thiserror",

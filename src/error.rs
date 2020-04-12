@@ -1,9 +1,13 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // error.rs - Error handling struct.
 
-use crate::script::DataType;
+use crate::script::{DataType, ParserState};
 use sdl2::video::WindowBuildError;
-use std::{io::Error as IoError, string::FromUtf8Error};
+use std::{
+    io::Error as IoError,
+    string::FromUtf8Error,
+    sync::{MutexGuard, PoisonError},
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -32,4 +36,12 @@ pub enum LitError {
     ExpectedNumericalDataType(DataType),
     #[error("Unable to find data file")]
     NoDataFile,
+    #[error("Mutex has been poisoned - this is likely an internal issue")]
+    PoisonedMutex,
+}
+
+impl<'a> From<PoisonError<MutexGuard<'a, ParserState>>> for LitError {
+    fn from(_f: PoisonError<MutexGuard<'a, ParserState>>) -> Self {
+        Self::PoisonedMutex
+    }
 }
