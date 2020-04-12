@@ -12,7 +12,7 @@ First, we need a decent way of handling comments. The most intuitive way of doin
 
 *Modifications to lits-cc/src/main.rs*
 
-```
+```rust
 for line in in_file.lines() {
     let line_ref = &line.unwrap();
     let processed_line = line_ref.split("#").next().unwrap_or_else(|| line_ref);
@@ -42,7 +42,7 @@ Of course, there is some extra complexity (for instance, the "def" command needs
 
 *Inside of lits-cc/src/state.rs*
 
-```
+```rust
 use crate::LitsCcError;
 use std::collections::HashMap;
 
@@ -77,7 +77,7 @@ impl CompilerState {
 
 *Modifications to lits-cc/src/main.rs*
 
-```
+```rust
 mod command;
 pub use command::process_command;
 
@@ -103,7 +103,7 @@ for (index, line) in in_file.lines().enumerate() {
 
 *Modifications to lits-cc/src/compile.rs*
 
-```
+```rust
 pub fn compile_line<T: Write>(
     line: &str,
     stream: &mut T,
@@ -128,7 +128,7 @@ pub fn compile_line<T: Write>(
 
 *Inside of lits-cc/src/command.rs*
 
-```
+```rust
 use crate::{CompilerState, LitsCcError};
 use proc_macro2::{Ident, TokenTree};
 use std::io::prelude::*;
@@ -172,7 +172,7 @@ pub fn process_command<TStream: Write, TIter: Iterator<Item = TokenTree>>(
 
 *Inside of lits-cc/src/literals.rs*
 
-```
+```rust
 use crate::{CompilerState, LitsCcError};
 use proc_macro2::{Ident, TokenTree};
 use std::io::prelude::*;
@@ -237,7 +237,7 @@ pub fn process_literals<TStream: Write, TIter: Iterator<Item = TokenTree>>(
 
 *Modifications to lits-cc/src/error.rs*
 
-```
+```rust
 #[error("{0}")]
 Msg(String),
 #[error("{0}")]
@@ -254,7 +254,7 @@ This ended up being a lot bigger of a task than I was expecting. I added a bette
 
 *Modifications to lits-cc/src/literals.rs*
 
-```
+```rust
 TokenTree::Group(g) => {
     if g.delimiter() != Delimiter::Parenthesis {
         return Err(LitsCcError::StaticMsg(
@@ -283,13 +283,13 @@ $ xxd out.dat
 
 Note that the last word of byte `0500` roughly corresponds to an empty tuple. I puzzled over want went wrong for a minute, before I realized I had done:
 
-```
+```rust
 let length = process_literals(iter, &mut cursor, state)?;
 ```
 
 I should not have used `iter` here. The `Group` proc macro type skips over the elements inside of the group. In reality, I should have done:
 
-```
+```rust
 let mut group_iter = g.stream().into_iter();
 let length = process_literals(&mut group_iter, &mut cursor, state)?;
 ```
@@ -298,7 +298,7 @@ This now gives me my desired result. Before anything else, let's go back to the 
 
 *Modifications to src/script/eval.rs*
 
-```
+```rust
 3 => {
      // log statement, output something to the debug log
      // home grown format processor, could be improved
@@ -327,7 +327,7 @@ This now gives me my desired result. Before anything else, let's go back to the 
 
 *Modifications to src/script/types.rs*
 
-```
+```rust
 impl fmt::Display for BytecodeObject {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
