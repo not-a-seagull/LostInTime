@@ -1,12 +1,16 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // main.rs - Program entry point
 
+mod color;
+mod draw;
 mod error;
 mod game;
 mod gl_renderer;
 mod renderer;
 mod script;
 
+pub use color::Color;
+pub use draw::*;
 pub use error::LitError;
 pub use game::Game;
 pub use renderer::Renderer;
