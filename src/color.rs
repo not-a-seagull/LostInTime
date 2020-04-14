@@ -27,4 +27,13 @@ impl Color {
             is_transparent: true,
         }
     }
+
+    pub fn as_gl_color(&self) -> [f32; 4] {
+        [
+            (self.r as f32) / 255.0,
+            (self.g as f32) / 255.0,
+            (self.b as f32) / 255.0,
+            if self.is_transparent { 0.0 } else { 1.0 },
+        ]
+    }
 }

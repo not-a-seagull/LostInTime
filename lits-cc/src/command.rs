@@ -5,6 +5,13 @@ use crate::{CompilerState, LitsCcError};
 use proc_macro2::{Ident, TokenTree};
 use std::io::prelude::*;
 
+#[inline]
+fn write_word<T: Write>(stream: &mut T, word: u16) -> Result<(), LitsCcError> {
+    let bytes = word.to_be_bytes();
+    stream.write(&bytes)?;
+    Ok(())
+}
+
 pub fn process_command<TStream: Write, TIter: Iterator<Item = TokenTree>>(
     ident: &Ident,
     iter: &mut TIter,
@@ -15,11 +22,11 @@ pub fn process_command<TStream: Write, TIter: Iterator<Item = TokenTree>>(
 
     match name.as_ref() {
         "gamedef" => {
-            stream.write(&[1])?;
+            write_word(stream, 1)?; 
             Ok(())
         }
         "def" => {
-            stream.write(&[2])?;
+            write_word(stream, 2)?;
 
             // also read in an ident
             match iter.next() {
@@ -34,7 +41,7 @@ pub fn process_command<TStream: Write, TIter: Iterator<Item = TokenTree>>(
             }
         }
         "log" => {
-            stream.write(&[3])?;
+            write_word(stream, 3)?;
             Ok(())
         }
         _ => Err(LitsCcError::UnknownCommand(name)),

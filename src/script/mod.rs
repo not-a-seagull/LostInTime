@@ -38,10 +38,6 @@ impl ParserState {
     }
 }
 
-lazy_static::lazy_static! {
-    pub static ref PARSER_STATE: Arc<Mutex<ParserState>> = Arc::new(Mutex::new(ParserState::new()));
-}
-
 #[derive(Debug)]
 pub struct GameData {
     name: String,
@@ -66,6 +62,7 @@ impl GameData {
 impl Bytecode for GameData {
     fn read<T: Read>(stream: &mut T) -> Result<Self, LitError> {
         let mut data = Self::new();
+        let mut state = ParserState::new();
 
         /*loop {
             if let Err(e) = eval::eval(stream, &mut data) {
@@ -74,7 +71,7 @@ impl Bytecode for GameData {
             } // go until error is encountered
         }*/
 
-        while let Ok(()) = eval::eval(stream, &mut data) {}
+        while let Ok(()) = eval::eval(stream, &mut data, &mut state) {}
 
         Ok(data)
     }
