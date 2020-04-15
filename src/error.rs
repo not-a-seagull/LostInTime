@@ -38,6 +38,8 @@ pub enum LitError {
     NoDataFile,
     #[error("Mutex has been poisoned - this is likely an internal issue")]
     PoisonedMutex,
+    #[error("Expected {0} dimensions, found {0}")]
+    ImproperDimensions(usize, usize),
 }
 
 impl<'a> From<PoisonError<MutexGuard<'a, ParserState>>> for LitError {

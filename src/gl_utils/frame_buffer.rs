@@ -34,6 +34,11 @@ impl FrameBuffer {
     }
 
     #[inline]
+    pub fn background_color(&self) -> Color {
+        self.background_color
+    }
+
+    #[inline]
     pub fn draws(&self) -> &[DrawInstruction] {
         &self.draws
     }

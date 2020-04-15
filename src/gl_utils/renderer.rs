@@ -1,5 +1,5 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// gl_renderer.rs - Renderer based on SDL2 and OpenGL
+// gl_utils/renderer.rs - Renderer based on SDL2 and OpenGL
 
 use crate::{Game, LitError, Renderer};
 use sdl2::{

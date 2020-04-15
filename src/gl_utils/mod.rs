@@ -4,6 +4,9 @@
 mod frame_buffer;
 pub use frame_buffer::FrameBuffer;
 
+mod renderer;
+pub use renderer::GlRenderer;
+
 mod shader;
 pub use shader::{Shader, ShaderType};
 

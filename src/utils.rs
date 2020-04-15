@@ -12,6 +12,7 @@ pub fn create_cstring_buffer(len: usize) -> CString {
 
 #[inline]
 pub fn cify_str(val: &str) -> *mut GLchar {
-    let c_string = CString::new(val).unwrap_or_else(|_| panic!("Unable to express {} as a GL string", val));
+    let c_string =
+        CString::new(val).unwrap_or_else(|_| panic!("Unable to express {} as a GL string", val));
     c_string.into_raw()
 }

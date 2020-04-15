@@ -3,7 +3,7 @@
 
 mod instruction;
 
-pub use instruction::{translate_draw_instruction, DrawInstruction};
+pub use instruction::DrawInstruction;
 
 use crate::{Color, LitError};
 use std::{fmt, ops::Deref};

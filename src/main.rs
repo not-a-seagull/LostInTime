@@ -7,7 +7,6 @@ pub mod utils;
 mod color;
 mod error;
 mod game;
-mod gl_renderer;
 mod gl_utils;
 mod renderer;
 mod script;
@@ -18,7 +17,7 @@ pub use error::LitError;
 pub use game::Game;
 pub use renderer::Renderer;
 
-use gl_renderer::GlRenderer;
+use gl_utils::GlRenderer;
 use script::Bytecode;
 
 use std::{

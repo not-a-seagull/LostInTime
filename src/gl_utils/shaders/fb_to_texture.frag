@@ -3,20 +3,44 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/shaders/fb_to_texture.frag - Calculate pixel color by calculating position in root image
 
-struct DrawInstruction {
-                     //  Alignment
-    uint kind;        //  16
-    float coords[4]; //  16 * 4 + 16 = 80
-    float color[4];  //  16 * 4 + 80 = 144
-};
-
 in vec2 tex_coords;
-out vec4 tex_coords;
+out vec4 color;
 
-uniform short s_width;
-uniform short s_height; 
-uniform DrawInstruction s_instructions[255]; // todo: raise limit if needed
+uniform int s_width;
+uniform int s_height; 
+uniform int s_draw_len;
+uniform sampler1d s_draws;
+uniform fvec4 bg_color;
+
+int determine_pix(float scale, int length) {
+    float real_scale = (scale + 1.0) / 2;
+    return int(real_scale * length);
+}
 
 void main() {
-    color = vec4(1.0, 0.0, 0.0, 1.0);
+    color = bg_color; 
+
+    // determine which pixel we are
+    vec2 pix_coords = vec2(determine_pix(tex_coords.x), determine_pix(tex_coords.y));
+
+    // iterate over draw instructions and see which ones involve this pixel
+    int base_index;
+    int kind;
+    ivec4 d_color;
+    ivec4 coords;
+    for (int i = 0; i < s_draw_len; i++) {
+        base_index = i * 3;
+        kind = texelFetch(s_draws, base_index, 0).x;
+        coords = texelFetch(s_draws, base_index + 1, 0);
+        d_color = texelFetch(s_draws, base_index + 2, 0);
+
+        // if our coords are in the designated zone, we are good
+        if ((kind == 1 && pix_coords.x == coords.x && pix_coords.y == coords.y) || // pixel
+            ((kind == 2 || kind == 3) && pix_coords.x >= coords.x && pix_coords.x <= coords.x + coords.z
+                       && pix_coords.y >= coords.y && pix_coords.y <= coords.y + coords.w) || // rectangle) {
+            color = vec4(d_color.x / 255, d_color.y / 255, d_color.z / 255, d_color.w / 255);
+            break;
+        }
+            
+    }
 }
