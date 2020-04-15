@@ -1,10 +1,10 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // main.rs - Program entry point
 
+pub mod draw;
 pub mod utils;
 
 mod color;
-mod draw;
 mod error;
 mod game;
 mod gl_renderer;

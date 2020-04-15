@@ -3,7 +3,13 @@
 
 use crate::LitError;
 use gl::types::{GLchar, GLint, GLuint};
-use std::{ffi::CString, io::prelude::*, path::Path, ptr};
+use std::{
+    ffi::CString,
+    fs::File,
+    io::{prelude::*, BufReader},
+    path::Path,
+    ptr,
+};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u32)]
@@ -47,6 +53,16 @@ impl Shader {
         } else {
             Ok(Self { id })
         }
+    }
+
+    pub fn load<S: AsRef<Path>>(path: &S, kind: ShaderType) -> Result<Self, LitError> {
+        let mut reader = BufReader::new(File::open(path)?);
+        Self::new(&mut reader, kind)
+    }
+
+    pub fn from_source<S: AsRef<[u8]>>(source: &S, kind: ShaderType) -> Result<Self, LitError> {
+        let mut reader = BufReader::new(source.as_ref());
+        Self::new(&mut reader, kind)
     }
 
     pub fn id(&self) -> GLuint {

@@ -11,7 +11,7 @@ pub struct Program {
 }
 
 impl Program {
-    pub fn new<T: Read>(shaders: &[Shader]) -> Result<Self, LitError> {
+    pub fn new(shaders: &[Shader]) -> Result<Self, LitError> {
         // get the id
         let id = unsafe { gl::CreateProgram() };
 
@@ -47,7 +47,12 @@ impl Program {
         Ok(Self { id })
     }
 
+    #[inline]
     pub fn id(&self) -> GLuint {
         self.id
+    }
+
+    pub fn activate(&self) {
+        unsafe { gl::UseProgram(self.id) }
     }
 }

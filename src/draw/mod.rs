@@ -1,10 +1,16 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // draw/mod.rs - Draw handle for an object that can be drawn on.
 
+mod instruction;
+
+pub use instruction::{translate_draw_instruction, DrawInstruction};
+
 use crate::{Color, LitError};
-use std::fmt;
+use std::{fmt, ops::Deref};
 
 pub trait DrawHandle: Sized + fmt::Display + fmt::Debug {
+    fn new(width: i16, height: i16, background_color: Color) -> Self;
+
     // draw a single pixel
     fn draw_pixel(&mut self, x: i16, y: i16, color: Color) -> Result<(), LitError>;
 
