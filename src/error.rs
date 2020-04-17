@@ -40,6 +40,8 @@ pub enum LitError {
     PoisonedMutex,
     #[error("Expected {0} dimensions, found {0}")]
     ImproperDimensions(usize, usize),
+    #[error("No material with the ID {0} was found")]
+    MissingMaterial(u32),
 }
 
 impl<'a> From<PoisonError<MutexGuard<'a, ParserState>>> for LitError {

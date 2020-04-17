@@ -11,7 +11,7 @@ mod shader;
 pub use shader::{Shader, ShaderType};
 
 mod texture;
-pub use texture::Texture;
+pub use texture::*;
 
 mod program;
 pub use program::Program;

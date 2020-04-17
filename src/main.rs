@@ -9,13 +9,16 @@ mod error;
 mod game;
 mod gl_utils;
 mod renderer;
+mod resource;
 mod script;
 
 pub use color::Color;
 pub use draw::*;
 pub use error::LitError;
 pub use game::Game;
+pub use gl_utils::*;
 pub use renderer::Renderer;
+pub use resource::*;
 
 use gl_utils::GlRenderer;
 use script::Bytecode;

@@ -6,6 +6,7 @@ use crate::LitError;
 use gl::types::{GLbyte, GLenum, GLint};
 use std::ffi::c_void;
 
+#[derive(Debug)]
 pub struct DIBufferType;
 
 impl TextureType for DIBufferType {
@@ -38,6 +39,7 @@ impl TextureType for DIBufferType {
     }
 }
 
+#[derive(Debug)]
 pub struct ImgTextureType;
 
 impl TextureType for ImgTextureType {

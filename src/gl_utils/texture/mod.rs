@@ -4,14 +4,16 @@
 use super::{FrameBuffer, Program, Shader, ShaderType};
 use crate::LitError;
 use gl::types::{GLenum, GLfloat, GLint, GLuint, GLvoid};
-use std::{ffi::c_void, marker::PhantomData, mem, ptr};
+use std::{ffi::c_void, fmt, marker::PhantomData, mem, ptr};
 
 mod dimensions;
-mod fb_to_tex;
+mod material;
+mod render;
 
 pub use dimensions::*;
+pub use material::*;
 
-pub trait TextureType {
+pub trait TextureType: fmt::Debug {
     type ValueType;
 
     fn bind_texture_location() -> GLenum;
