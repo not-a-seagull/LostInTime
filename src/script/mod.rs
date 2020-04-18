@@ -9,7 +9,7 @@ mod eval;
 mod types;
 pub use types::{BytecodeObject, DataType};
 
-use super::LitError;
+use super::{Color, LitError, ResourceDictionary};
 use std::{
     collections::HashMap,
     io::prelude::*,
@@ -18,11 +18,13 @@ use std::{
 
 pub struct ParserState {
     variables: HashMap<u32, BytecodeObject>,
+    color_ids: HashMap<u32, HashMap<u8, Color>>,
 }
 
 impl ParserState {
     pub fn new() -> Self {
         Self {
+            color_ids: HashMap::new(),
             variables: HashMap::new(),
         }
     }
@@ -35,6 +37,20 @@ impl ParserState {
         self.variables
             .get(&index)
             .ok_or_else(|| LitError::VariableNotFound(index))
+    }
+
+    pub fn register_color_id(&mut self, object: u32, index: u8, clr: Color) {
+        let dict = self.color_ids.get_mut(&object).unwrap_or_else(|| {
+            self.color_ids.insert(object, HashMap::new());
+            self.color_ids.get_mut(&object).unwrap()
+        });
+
+        dict.insert(index, clr);
+    }
+
+    pub fn get_color_id(&self, object: u32, index: u8) -> Result<&Color, LitError> {
+        self.color_ids.get(&object).ok_or_else(|| LitError::ColorIdObjectNotFound(object))?
+            .get(&index).ok_or_else(|| LitError::ColorIdNotFound(object, index))
     }
 }
 

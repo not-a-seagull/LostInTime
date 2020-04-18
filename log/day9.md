@@ -1,17 +1,20 @@
-// Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// command.rs - Process a command in the LitScript
+# Day 9
 
-use crate::{CompilerState, LitsCcError};
-use proc_macro2::{Ident, TokenTree};
-use std::io::prelude::*;
+Now that we have a form of resource management in place, it's time to finally write code that handles images. Here's what I imagine LitScript image creation looking like:
 
-#[inline]
-fn write_word<T: Write>(stream: &mut T, word: u16) -> Result<(), LitsCcError> {
-    let bytes = word.to_be_bytes();
-    stream.write(&bytes)?;
-    Ok(())
-}
+```
+create_tex MY_SPRITE 5 5 (255 0 0 1)
+color_id @MY_SPRITE 0 (0 0 0 1)
+color_id @MY_SPRITE 1 (0 255 255 1)
+draw_pixel @MY_SPRITE 1 1 0
+draw_rect @MY_SPRITE 2 2 4 4 1
+```
 
+Let's add the compiler commands for this.
+
+*Modifications to lits-cc/src/command.rs*
+
+```rust
 pub fn read_ident<TStream: Write, TIter: Iterator<Item = TokenTree>>(
     iter: &mut TIter,
     stream: &mut TStream,
@@ -54,3 +57,21 @@ pub fn process_command<TStream: Write, TIter: Iterator<Item = TokenTree>>(
         _ => Err(LitsCcError::UnknownCommand(name)),
     }
 }
+```
+
+Now that we can produce image generation code, I've compiled this file:
+
+```
+gamedef "Lost in Time"                # define this game as "Lost in Time"
+def MY_VAR 1                          # define MY_VAR as being equal to one
+log "MY_VAR is equal to {}" (@MY_VAR) # print "MY_VAR is equal to 1" to the console
+# just a comment
+
+create_tex MY_SPRITE 5 5 (255 0 0 1)  # create a 5x5 image with background color of red
+color_id @MY_SPRITE 0 (0 0 0 1)       # set color id 0 to black
+color_id @MY_SPRITE 1 (0 255 255 1)   # set color id 1 to yellow
+draw_pixel @MY_SPRITE 1 1 0           # draw pixel at (1, 1) with color id 0
+draw_rect @MY_SPRITE 2 2 4 4 1        # draw rectangle at (2, 2, 4, 4) with color id 1
+```
+
+Unfortunately I got busy and could not complete the rest of this code.

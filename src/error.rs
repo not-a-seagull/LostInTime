@@ -30,6 +30,10 @@ pub enum LitError {
     FromUtf8(#[from] FromUtf8Error),
     #[error("Unable to find variable with reference {0:X?}")]
     VariableNotFound(u32),
+    #[error("Color map does not contain ID {0}")]
+    ColorIdObjectNotFound(u32),
+    #[error("Color map at {0} does not contain color {1}")]
+    ColorIdNotFound(u32, u8),
     #[error("Expected data type {1:?}, found {0:?}")]
     IncorrectDataType(DataType, DataType),
     #[error("Expected a numerical data type, found {0:?}")]
