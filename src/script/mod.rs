@@ -39,18 +39,30 @@ impl ParserState {
             .ok_or_else(|| LitError::VariableNotFound(index))
     }
 
+    pub fn get_variable_mut(&mut self, index: u32) -> Result<&mut BytecodeObject, LitError> {
+        self.variables
+            .get_mut(&index)
+            .ok_or_else(|| LitError::VariableNotFound(index))
+    }
+
     pub fn register_color_id(&mut self, object: u32, index: u8, clr: Color) {
-        let dict = self.color_ids.get_mut(&object).unwrap_or_else(|| {
-            self.color_ids.insert(object, HashMap::new());
-            self.color_ids.get_mut(&object).unwrap()
-        });
+        let dict = match self.color_ids.get_mut(&object) {
+            Some(d) => d,
+            None => {
+                self.color_ids.insert(object, HashMap::new());
+                self.color_ids.get_mut(&object).unwrap()
+            }
+        };
 
         dict.insert(index, clr);
     }
 
-    pub fn get_color_id(&self, object: u32, index: u8) -> Result<&Color, LitError> {
-        self.color_ids.get(&object).ok_or_else(|| LitError::ColorIdObjectNotFound(object))?
-            .get(&index).ok_or_else(|| LitError::ColorIdNotFound(object, index))
+    pub fn get_color(&self, object: u32, index: u8) -> Result<&Color, LitError> {
+        self.color_ids
+            .get(&object)
+            .ok_or_else(|| LitError::ColorIdObjectNotFound(object))?
+            .get(&index)
+            .ok_or_else(|| LitError::ColorIdNotFound(object, index))
     }
 }
 
@@ -80,14 +92,14 @@ impl Bytecode for GameData {
         let mut data = Self::new();
         let mut state = ParserState::new();
 
-        /*loop {
-            if let Err(e) = eval::eval(stream, &mut data) {
+        loop {
+            if let Err(e) = eval::eval(stream, &mut data, &mut state) {
                 eprintln!("Error encountered: {}", e);
                 break;
             } // go until error is encountered
-        }*/
+        }
 
-        while let Ok(()) = eval::eval(stream, &mut data, &mut state) {}
+        //        while let Ok(()) = eval::eval(stream, &mut data, &mut state) {}
 
         Ok(data)
     }

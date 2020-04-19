@@ -5,6 +5,7 @@ use crate::script::{DataType, ParserState};
 use sdl2::video::WindowBuildError;
 use std::{
     io::Error as IoError,
+    num::TryFromIntError,
     string::FromUtf8Error,
     sync::{MutexGuard, PoisonError},
 };
@@ -46,6 +47,8 @@ pub enum LitError {
     ImproperDimensions(usize, usize),
     #[error("No material with the ID {0} was found")]
     MissingMaterial(u32),
+    #[error("Conversion error: {0}")]
+    TryFromInt(#[from] TryFromIntError),
 }
 
 impl<'a> From<PoisonError<MutexGuard<'a, ParserState>>> for LitError {

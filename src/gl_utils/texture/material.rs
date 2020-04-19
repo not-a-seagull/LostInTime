@@ -9,7 +9,7 @@ use crate::{
 use gl::types::{GLint, GLuint};
 use std::{collections::HashMap, fmt};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ImgMaterial {
     width: i16,
     height: i16,
@@ -19,6 +19,11 @@ pub struct ImgMaterial {
 }
 
 impl ImgMaterial {
+    #[inline]
+    pub fn new(width: i16, height: i16, background_color: Color) -> Self {
+        Self::from_draws(width, height, background_color, vec![])
+    }
+
     #[inline]
     pub fn from_draws(
         width: i16,
@@ -68,11 +73,6 @@ impl fmt::Display for ImgMaterial {
 }
 
 impl DrawHandle for ImgMaterial {
-    #[inline]
-    fn new(width: i16, height: i16, background_color: Color) -> Self {
-        Self::from_draws(width, height, background_color, vec![])
-    }
-
     fn draw_pixel(&mut self, x: i16, y: i16, color: Color) -> Result<(), LitError> {
         self.draws.push(DrawInstruction::Pixel { x, y, color });
         Ok(())

@@ -105,8 +105,8 @@ impl ResourceDictionary {
             if !self.loaded_ids.contains(&i) {
                 self.unload_res::<ImgTexture>(i);
             }
-        }    
- 
+        }
+
         self.prev_loaded_ids.clear();
     }
 }

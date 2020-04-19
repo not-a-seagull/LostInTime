@@ -8,8 +8,8 @@ pub use instruction::DrawInstruction;
 use crate::{Color, LitError};
 use std::{fmt, ops::Deref};
 
-pub trait DrawHandle: Sized + fmt::Display + fmt::Debug {
-    fn new(width: i16, height: i16, background_color: Color) -> Self;
+pub trait DrawHandle: fmt::Display + fmt::Debug {
+    //    fn new(width: i16, height: i16, background_color: Color) -> Self;
 
     // draw a single pixel
     fn draw_pixel(&mut self, x: i16, y: i16, color: Color) -> Result<(), LitError>;

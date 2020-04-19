@@ -2,16 +2,19 @@
 // script/types.rs - Types used in bytecode reading.
 
 use super::{Bytecode, ParserState};
-use crate::LitError;
+use crate::{draw::DrawHandle, Color, ImgMaterial, LitError};
 use std::{borrow::Cow, fmt, io::prelude::*};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataType {
+    Unknown,
     Numeric8,
     Numeric16,
     Numeric32,
     Str,
     Tuple,
+    ImgMaterial,
+    VarInvocation,
 }
 
 #[derive(Debug, Clone)]
@@ -22,6 +25,7 @@ pub enum BytecodeObject {
     Str(String),
     Tuple(Vec<BytecodeObject>),
     VarInvocation(u32),
+    ImgMaterial(ImgMaterial),
 }
 
 impl BytecodeObject {
@@ -34,6 +38,7 @@ impl BytecodeObject {
             &BytecodeObject::Str(_) => DataType::Str,
             &BytecodeObject::Tuple(_) => DataType::Tuple,
             &BytecodeObject::VarInvocation(i) => state.get_variable(i).unwrap().data_type(state),
+            &BytecodeObject::ImgMaterial(_) => DataType::ImgMaterial,
         }
     }
 
@@ -83,6 +88,62 @@ impl BytecodeObject {
             &BytecodeObject::Str(ref u) => Ok(format!("{}", u)),
             &BytecodeObject::Tuple(ref s) => Ok(format!("{:?}", s)),
             &BytecodeObject::VarInvocation(u) => Self::stringify(state.get_variable(u)?, state),
+            &BytecodeObject::ImgMaterial(ref i) => Ok(format!("{}", i)),
+        }
+    }
+
+    #[inline]
+    pub fn get_var_id(&self, state: &ParserState) -> Result<u32, LitError> {
+        match self {
+            &BytecodeObject::VarInvocation(u) => Ok(u),
+            _ => Err(LitError::IncorrectDataType(
+                self.data_type(state),
+                DataType::VarInvocation,
+            )),
+        }
+    }
+
+    pub fn as_color<'a>(&'a self, state: &'a ParserState) -> Result<Color, LitError> {
+        let tuple = self.as_tuple(state)?;
+        let mut values = vec![];
+
+        for value in tuple {
+            values.push(value.as_number(state)?);
+        }
+
+        Color::from_arr(&values)
+    }
+
+    pub fn as_draw_handle<'a>(
+        &'a self,
+        state: &'a ParserState,
+    ) -> Result<&'a dyn DrawHandle, LitError> {
+        match self {
+            &BytecodeObject::ImgMaterial(ref i) => Ok(i),
+            &BytecodeObject::VarInvocation(i) => state.get_variable(i)?.as_draw_handle(state),
+            _ => Err(LitError::IncorrectDataType(
+                self.data_type(state),
+                DataType::ImgMaterial,
+            )),
+        }
+    }
+
+    fn
+
+    pub fn as_draw_handle_mut<'a>(
+        &'a mut self,
+        state: &'a mut ParserState,
+    ) -> Result<&'a mut dyn DrawHandle, LitError> {
+        match self {
+            &mut BytecodeObject::ImgMaterial(ref mut i) => Ok(i),
+            &mut BytecodeObject::VarInvocation(i) => {
+                let mut var = state.get_variable_mut(i)?;
+                var.as_draw_handle_mut(state)
+            }
+            _ => Err(LitError::IncorrectDataType(
+                self.data_type(state),
+                DataType::ImgMaterial,
+            )),
         }
     }
 }

@@ -20,7 +20,7 @@ pub trait TextureType: fmt::Debug {
     fn tex_image(dimensions: &[i16], data: *const Self::ValueType) -> Result<(), LitError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Texture<T: TextureType> {
     id: GLuint,
     dimensions: Vec<i16>,
