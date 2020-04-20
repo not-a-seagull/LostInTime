@@ -17,11 +17,9 @@ pub use draw::*;
 pub use error::LitError;
 pub use game::Game;
 pub use gl_utils::*;
-pub use renderer::Renderer;
+pub use renderer::*;
 pub use resource::*;
-
-use gl_utils::GlRenderer;
-use script::Bytecode;
+pub use script::*;
 
 use std::{
     env, fs,

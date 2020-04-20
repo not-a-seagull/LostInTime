@@ -4,7 +4,7 @@
 use super::DIBuffer;
 use crate::{
     draw::{DrawHandle, DrawInstruction},
-    Color, LitError, Material, ResourceDictionary,
+    BytecodeObject, Color, DataType, LitError, Material, ResourceDictionary,
 };
 use gl::types::{GLint, GLuint};
 use std::{collections::HashMap, fmt};
@@ -93,6 +93,21 @@ impl DrawHandle for ImgMaterial {
 }
 
 impl Material for ImgMaterial {
+    #[inline]
+    fn from_bytecode_object(
+        bobj: BytecodeObject,
+        _d: &[Result<u32, LitError>],
+    ) -> Result<Self, LitError> {
+        if let BytecodeObject::ImgMaterial(img) = bobj {
+            Ok(img)
+        } else {
+            Err(LitError::IncorrectDataType(
+                DataType::Unknown,
+                DataType::ImgMaterial,
+            ))
+        }
+    }
+
     #[inline]
     fn get_subdict(dict: &ResourceDictionary) -> &HashMap<u32, Self> {
         dict.mat_img_subdict()

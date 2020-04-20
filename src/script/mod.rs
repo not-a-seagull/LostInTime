@@ -9,23 +9,35 @@ mod eval;
 mod types;
 pub use types::{BytecodeObject, DataType};
 
-use super::{Color, LitError, ResourceDictionary};
+use super::{Color, ImgMaterial, LitError, Material, MaterialType, ResourceDictionary};
 use std::{
     collections::HashMap,
     io::prelude::*,
     sync::{Arc, Mutex},
 };
 
+#[derive(Debug, Copy, Clone)]
+pub struct Dependancy {
+    pub kind: MaterialType,
+    pub id: u32,
+}
+
 pub struct ParserState {
-    variables: HashMap<u32, BytecodeObject>,
+    pub variables: HashMap<u32, BytecodeObject>,
+    pub dependency_relations: HashMap<u32, Vec<Dependancy>>,
     color_ids: HashMap<u32, HashMap<u8, Color>>,
+
+    // storage for various types of resources
+    pub img_material_ids: Vec<u32>,
 }
 
 impl ParserState {
     pub fn new() -> Self {
         Self {
             color_ids: HashMap::new(),
+            dependency_relations: HashMap::new(),
             variables: HashMap::new(),
+            img_material_ids: vec![],
         }
     }
 
@@ -37,6 +49,10 @@ impl ParserState {
         self.variables
             .get(&index)
             .ok_or_else(|| LitError::VariableNotFound(index))
+    }
+
+    pub fn add_dependencies(&mut self, index: u32, dependencies: Vec<Dependancy>) {
+        self.dependency_relations.insert(index, dependencies);
     }
 
     pub fn get_variable_mut(&mut self, index: u32) -> Result<&mut BytecodeObject, LitError> {
@@ -64,17 +80,78 @@ impl ParserState {
             .get(&index)
             .ok_or_else(|| LitError::ColorIdNotFound(object, index))
     }
+
+    pub fn into_resource_dict(self) -> Result<ResourceDictionary, LitError> {
+        let mut rd = ResourceDictionary::new();
+        let ParserState {
+            mut variables,
+            dependency_relations,
+            img_material_ids,
+            ..
+        } = self;
+
+        insert_materials::<ImgMaterial>(
+            &mut rd,
+            &dependency_relations,
+            &mut variables,
+            img_material_ids,
+        )?;
+
+        Ok(rd)
+    }
+}
+
+// helper function: insert resources for a certain type
+#[inline]
+fn insert_material<T: Material>(
+    rd: &mut ResourceDictionary,
+    dep_rels: &HashMap<u32, Vec<Dependancy>>,
+    variables: &mut HashMap<u32, BytecodeObject>,
+    id: u32,
+) -> Result<u32, LitError> {
+    // loop through dependencies to get ids for these dependencies
+    let dep_ids: Vec<Result<u32, LitError>> = if let Some(deps) = dep_rels.get(&id) {
+        deps.iter()
+            .map(|dep| match dep.kind {
+                ImgMaterial => insert_material::<ImgMaterial>(rd, dep_rels, variables, dep.id),
+            })
+            .collect()
+    } else {
+        vec![]
+    };
+
+    if let Some(mat) = variables.remove(&id) {
+        Ok(rd.add_mat(T::from_bytecode_object(mat, &dep_ids)?))
+    } else {
+        Err(LitError::VariableNotFound(id))
+    }
+}
+
+#[inline]
+fn insert_materials<T: Material>(
+    rd: &mut ResourceDictionary,
+    dep_rels: &HashMap<u32, Vec<Dependancy>>,
+    variables: &mut HashMap<u32, BytecodeObject>,
+    ids: Vec<u32>,
+) -> Result<(), LitError> {
+    for id in ids {
+        insert_material::<T>(rd, dep_rels, variables, id)?;
+    }
+
+    Ok(())
 }
 
 #[derive(Debug)]
 pub struct GameData {
     name: String,
+    resource_dict: Option<ResourceDictionary>,
 }
 
 impl GameData {
     pub fn new() -> Self {
         Self {
             name: String::from("Unnamed"),
+            resource_dict: None,
         }
     }
 
@@ -92,14 +169,18 @@ impl Bytecode for GameData {
         let mut data = Self::new();
         let mut state = ParserState::new();
 
-        loop {
-            if let Err(e) = eval::eval(stream, &mut data, &mut state) {
-                eprintln!("Error encountered: {}", e);
-                break;
+        'parse: loop {
+            match eval::eval(stream, &mut data, &mut state) {
+                Err(e) => {
+                    eprintln!("Error encountered: {}", e);
+                    break 'parse;
+                }
+                Ok(false) => break 'parse,
+                Ok(true) => {}
             } // go until error is encountered
         }
 
-        //        while let Ok(()) = eval::eval(stream, &mut data, &mut state) {}
+        data.resource_dict = Some(state.into_resource_dict()?);
 
         Ok(data)
     }

@@ -128,7 +128,17 @@ impl BytecodeObject {
         }
     }
 
-    fn
+    // as draw handle minus the need for the state
+    #[inline]
+    fn as_draw_handle_mut_no_state<'a>(&'a mut self) -> Result<&'a mut dyn DrawHandle, LitError> {
+        match self {
+            &mut BytecodeObject::ImgMaterial(ref mut i) => Ok(i),
+            _ => Err(LitError::IncorrectDataType(
+                DataType::Unknown,
+                DataType::ImgMaterial,
+            )),
+        }
+    }
 
     pub fn as_draw_handle_mut<'a>(
         &'a mut self,
@@ -138,7 +148,7 @@ impl BytecodeObject {
             &mut BytecodeObject::ImgMaterial(ref mut i) => Ok(i),
             &mut BytecodeObject::VarInvocation(i) => {
                 let mut var = state.get_variable_mut(i)?;
-                var.as_draw_handle_mut(state)
+                var.as_draw_handle_mut_no_state()
             }
             _ => Err(LitError::IncorrectDataType(
                 self.data_type(state),

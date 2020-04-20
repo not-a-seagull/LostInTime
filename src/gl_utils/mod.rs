@@ -15,3 +15,5 @@ pub use texture::*;
 
 mod program;
 pub use program::Program;
+
+pub mod vertices;

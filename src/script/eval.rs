@@ -9,7 +9,7 @@ pub fn eval<T: Read>(
     stream: &mut T,
     data: &mut GameData,
     state: &mut ParserState,
-) -> Result<(), LitError> {
+) -> Result<bool, LitError> {
     // read a single word from the stream
     let mut buffer = [0; 2];
     stream.read(&mut buffer)?;
@@ -21,7 +21,7 @@ pub fn eval<T: Read>(
             data.set_name(String::from(
                 BytecodeObject::read(stream)?.as_string(state)?,
             ));
-            Ok(())
+            Ok(true)
         }
         2 => {
             // def statement, define a runtime variable
@@ -29,7 +29,7 @@ pub fn eval<T: Read>(
             stream.read(&mut buffer)?;
             let id = u32::from_be_bytes(buffer);
             state.register_variable(id, BytecodeObject::read(stream)?);
-            Ok(())
+            Ok(true)
         }
         3 => {
             // log statement, output something to the debug log
@@ -52,7 +52,7 @@ pub fn eval<T: Read>(
                 .join("");
             println!("{}", formatted_str);
 
-            Ok(())
+            Ok(true)
         }
         4 => {
             // create a new texture material
@@ -70,8 +70,9 @@ pub fn eval<T: Read>(
 
             let mat = ImgMaterial::new(width, height, bg_color);
             state.register_variable(id, BytecodeObject::ImgMaterial(mat));
+            state.img_material_ids.push(id);
 
-            Ok(())
+            Ok(true)
         }
         5 => {
             // assign a color id to an invocation
@@ -83,7 +84,7 @@ pub fn eval<T: Read>(
             let color = BytecodeObject::read(stream)?.as_color(state)?;
 
             state.register_color_id(buf_id, clr_id, color);
-            Ok(())
+            Ok(true)
         }
         6 => {
             // draw a single pixel
@@ -102,8 +103,33 @@ pub fn eval<T: Read>(
 
             let draw_handle = draw_buffer.as_draw_handle_mut(state)?;
 
-            draw_handle.draw_pixel(x, y, color)
+            draw_handle.draw_pixel(x, y, color)?;
+            Ok(true)
         }
+        7 => {
+            // draw a rectangle
+            let mut draw_buffer = BytecodeObject::read(stream)?;
+            let draw_id = draw_buffer.get_var_id(state)?;
+
+            let x = BytecodeObject::read(stream)?.as_number(state)?.try_into()?;
+            let y = BytecodeObject::read(stream)?.as_number(state)?.try_into()?;
+            let width = BytecodeObject::read(stream)?.as_number(state)?.try_into()?;
+            let height = BytecodeObject::read(stream)?.as_number(state)?.try_into()?;
+
+            let color = match state.get_color(
+                draw_id,
+                BytecodeObject::read(stream)?.as_number(state)?.try_into()?,
+            ) {
+                Ok(c) => *c,
+                Err(_e) => BytecodeObject::read(stream)?.as_color(state)?,
+            };
+
+            let draw_handle = draw_buffer.as_draw_handle_mut(state)?;
+
+            draw_handle.draw_rectangle(x, y, width, height, color)?;
+            Ok(true)
+        }
+        0 => Ok(false),
         _ => Err(LitError::BytecodeRead16(res)),
     }
 }

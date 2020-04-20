@@ -2,7 +2,7 @@
 // gl_utils/texture/fb_to_tex.rs - Convert a frame buffer to a texture.
 
 use super::{
-    super::{FrameBuffer, Program, Shader, ShaderType},
+    super::{vertices::QUAD_VERTICES, FrameBuffer, Program, Shader, ShaderType},
     DIBuffer, ImgMaterial, ImgTexture, Texture,
 };
 use crate::{draw::DrawInstruction, utils::cify_str, LitError, Resource, ResourceDictionary};
@@ -83,7 +83,7 @@ impl Resource for ImgTexture {
             gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
             gl::BufferData(
                 gl::ARRAY_BUFFER,
-                mem::size_of_val(&VERTICES) as isize,
+                mem::size_of_val(&QUAD_VERTICES) as isize,
                 VERTICES.as_ptr() as *const c_void,
                 gl::STATIC_DRAW,
             );
