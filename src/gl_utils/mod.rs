@@ -7,11 +7,17 @@ pub use frame_buffer::FrameBuffer;
 mod renderer;
 pub use renderer::GlRenderer;
 
+mod quad;
+pub use quad::Quad;
+
 mod shader;
 pub use shader::{Shader, ShaderType};
 
 mod texture;
 pub use texture::*;
+
+mod uniform;
+pub use uniform::*;
 
 mod program;
 pub use program::Program;

@@ -1,8 +1,8 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// gl_utils/texture/fb_to_tex.rs - Convert a frame buffer to a texture.
+// gl_utils/texture/render.rs - Convert a frame buffer to a texture.
 
 use super::{
-    super::{vertices::QUAD_VERTICES, FrameBuffer, Program, Shader, ShaderType},
+    super::{vertices::QUAD_VERTICES, FrameBuffer, Program, Quad, Shader, ShaderType},
     DIBuffer, ImgMaterial, ImgTexture, Texture,
 };
 use crate::{draw::DrawInstruction, utils::cify_str, LitError, Resource, ResourceDictionary};
@@ -20,22 +20,6 @@ lazy_static::lazy_static! {
 
         Program::new(&[vert, frag]).expect("Shader linking failed")
     };
-}
-
-const VERTICES: [GLfloat; 24] = [
-    0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 1.0, 0.0, 1.0, 0.0,
-];
-
-macro_rules! assign_uniform {
-    ($name: expr => $call: ident <= $($val: expr),*) => {
-        {
-            let loc = unsafe { gl::GetUniformLocation(TEXTURE_RENDERER.id(), cify_str($name)) };
-            if loc != -1 {
-                unsafe { gl::$call(loc, $($val),*) };
-            }
-        }
-    }
 }
 
 impl Resource for ImgTexture {
@@ -70,54 +54,25 @@ impl Resource for ImgTexture {
             )
         };
 
-        // initialize VAO and VBO
-        let mut vao: GLuint = 0;
-        let mut vbo: GLuint = 0;
+        unsafe { gl::Viewport(0, 0, mat.width() as GLint, mat.height() as GLint) };
 
-        unsafe {
-            gl::Viewport(0, 0, mat.width() as GLint, mat.height() as GLint);
-            gl::GenVertexArrays(1, &mut vao);
-            gl::GenBuffers(1, &mut vbo);
-
-            // fill the buffer with the required vertices
-            gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                mem::size_of_val(&QUAD_VERTICES) as isize,
-                VERTICES.as_ptr() as *const c_void,
-                gl::STATIC_DRAW,
-            );
-
-            gl::BindVertexArray(vao);
-            gl::EnableVertexAttribArray(0);
-            gl::VertexAttribPointer(
-                0,
-                4,
-                gl::FLOAT,
-                gl::FALSE,
-                (4 * mem::size_of::<GLfloat>()) as GLint,
-                0 as *const GLvoid,
-            );
-        }
+        let mut quad = Quad::new();
+        quad.bind();
 
         TEXTURE_RENDERER.activate();
 
         // set up uniforms
-        assign_uniform!("s_width" => Uniform1i <= mat.width() as GLint);
-        assign_uniform!("s_height" => Uniform1i <= mat.height() as GLint);
-        assign_uniform!("s_draw_len" => Uniform1i <= mat.draws().len() as GLint);
-
-        let bg_clr = mat.background_color().as_gl_color();
-        assign_uniform!("bg_color" => Uniform4f <= bg_clr[0], bg_clr[1], bg_clr[2], bg_clr[3]);
+        TEXTURE_RENDERER.set_uniform("s_width", mat.width() as GLint);
+        TEXTURE_RENDERER.set_uniform("s_height", mat.height() as GLint);
+        TEXTURE_RENDERER.set_uniform("s_draw_len", mat.draws().len() as GLint);
+        TEXTURE_RENDERER.set_uniform("bg_color", mat.background_color().as_gl_color());
 
         // bind the DI buffer to the context
         let di_buffer = mat.buffer().unwrap();
         di_buffer.bind();
 
-        unsafe {
-            gl::DrawArrays(gl::TRIANGLES, 0, 6);
-            gl::BindVertexArray(0);
-        }
+        quad.draw();
+        quad.unbind();
 
         di_buffer.unbind();
         fb.unbind();

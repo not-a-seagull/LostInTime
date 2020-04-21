@@ -1,7 +1,7 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/program.rs - Define a single OpenGL shader
 
-use super::Shader;
+use super::{Shader, Uniform};
 use crate::LitError;
 use gl::types::{GLchar, GLint, GLuint};
 use std::{io::prelude::*, ptr};
@@ -54,5 +54,10 @@ impl Program {
 
     pub fn activate(&self) {
         unsafe { gl::UseProgram(self.id) }
+    }
+
+    #[inline]
+    pub fn set_uniform<T: Uniform>(&self, uname: &'static str, uniform: T) {
+        uniform.set_uniform(uname, self.id());
     }
 }

@@ -2,7 +2,7 @@
 // renderer.rs - Renderer trait.
 
 use crate::{Game, ImgTexture, LitError};
-use nalgebra::base::Point2;
+use nalgebra::geometry::Point2;
 
 pub trait Renderer {
     fn main_loop(&self, game: &Game) -> Result<(), LitError>;
