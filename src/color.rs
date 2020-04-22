@@ -54,7 +54,7 @@ impl Color {
     }
 
     #[inline]
-    pub fn as_gl_color(&self) -> [f32; 4] {
+    pub fn as_gl_color(self) -> [f32; 4] {
         [
             (self.r as f32) / 255.0,
             (self.g as f32) / 255.0,

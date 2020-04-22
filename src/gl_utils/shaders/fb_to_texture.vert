@@ -5,9 +5,17 @@
 
 layout (location = 0) in vec4 vertex;
 
-out vec2 tex_coords;
+out ivec2 pix_coords;
+
+uniform int s_width;
+uniform int s_height;
+
+int determine_pix(float scale, int length) {
+    float real_scale = (scale + 1.0) / 2;
+    return int(real_scale * length);
+}
 
 void main() {
-    tex_coords = vertex.zw;
+    pix_coords = ivec2(determine_pix(vertex.z, s_width), determine_pix(vertex.w, s_height));
     gl_Position = vec4(vertex.xy, 0.0, 1.0);
 }

@@ -6,7 +6,7 @@ use crate::{
     draw::{DrawHandle, DrawInstruction},
     BytecodeObject, Color, DataType, LitError, Material, ResourceDictionary,
 };
-use gl::types::{GLint, GLuint};
+use gl::types::GLint;
 use std::{collections::HashMap, fmt};
 
 #[derive(Debug, Clone)]

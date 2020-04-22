@@ -1,14 +1,9 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/frame_buffer.rs - An OpenGL FrameBuffer
 
-use crate::{
-    draw::{DrawHandle, DrawInstruction},
-    Color, LitError,
-};
 use gl::types::GLuint;
-use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Default, Clone)]
 pub struct FrameBuffer {
     fbo: GLuint,
 }

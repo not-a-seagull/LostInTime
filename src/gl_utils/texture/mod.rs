@@ -1,10 +1,9 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/texture/mod.rs - OpenGL texture
 
-use super::{FrameBuffer, Program, Shader, ShaderType};
 use crate::LitError;
-use gl::types::{GLenum, GLfloat, GLint, GLuint, GLvoid};
-use std::{ffi::c_void, fmt, marker::PhantomData, mem, ptr};
+use gl::types::{GLenum, GLuint};
+use std::{fmt, marker::PhantomData};
 
 mod dimensions;
 mod material;
@@ -44,7 +43,7 @@ impl<T: TextureType> Texture<T> {
 
         Ok(Self {
             id,
-            dimensions: dimensions.iter().map(|i| *i).collect(),
+            dimensions: dimensions.iter().copied().collect(),
             _phantom: PhantomData,
         })
     }

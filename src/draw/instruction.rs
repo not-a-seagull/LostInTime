@@ -32,55 +32,55 @@ pub enum DrawInstruction {
 impl DrawInstruction {
     #[inline]
     pub fn identifier(&self) -> i32 {
-        match self {
-            &DrawInstruction::Pixel { .. } => 1,
-            &DrawInstruction::Rectangle { .. } => 2,
-            &DrawInstruction::Square { .. } => 3,
+        match *self {
+            DrawInstruction::Pixel { .. } => 1,
+            DrawInstruction::Rectangle { .. } => 2,
+            DrawInstruction::Square { .. } => 3,
         }
     }
 
     #[inline]
     pub fn x(&self) -> i16 {
-        match self {
-            &DrawInstruction::Pixel { x, .. } => x,
-            &DrawInstruction::Rectangle { x, .. } => x,
-            &DrawInstruction::Square { x, .. } => x,
+        match *self {
+            DrawInstruction::Pixel { x, .. } => x,
+            DrawInstruction::Rectangle { x, .. } => x,
+            DrawInstruction::Square { x, .. } => x,
         }
     }
 
     #[inline]
     pub fn y(&self) -> i16 {
-        match self {
-            &DrawInstruction::Pixel { y, .. } => y,
-            &DrawInstruction::Rectangle { y, .. } => y,
-            &DrawInstruction::Square { y, .. } => y,
+        match *self {
+            DrawInstruction::Pixel { y, .. } => y,
+            DrawInstruction::Rectangle { y, .. } => y,
+            DrawInstruction::Square { y, .. } => y,
         }
     }
 
     #[inline]
     pub fn width(&self) -> Option<i16> {
-        match self {
-            &DrawInstruction::Pixel { .. } => None,
-            &DrawInstruction::Rectangle { w, .. } => Some(w),
-            &DrawInstruction::Square { l, .. } => Some(l),
+        match *self {
+            DrawInstruction::Pixel { .. } => None,
+            DrawInstruction::Rectangle { w, .. } => Some(w),
+            DrawInstruction::Square { l, .. } => Some(l),
         }
     }
 
     #[inline]
     pub fn height(&self) -> Option<i16> {
-        match self {
-            &DrawInstruction::Pixel { .. } => None,
-            &DrawInstruction::Rectangle { h, .. } => Some(h),
-            &DrawInstruction::Square { l, .. } => Some(l),
+        match *self {
+            DrawInstruction::Pixel { .. } => None,
+            DrawInstruction::Rectangle { h, .. } => Some(h),
+            DrawInstruction::Square { l, .. } => Some(l),
         }
     }
 
     #[inline]
     pub fn color(&self) -> Color {
-        match self {
-            &DrawInstruction::Pixel { color, .. } => color,
-            &DrawInstruction::Rectangle { color, .. } => color,
-            &DrawInstruction::Square { color, .. } => color,
+        match *self {
+            DrawInstruction::Pixel { color, .. } => color,
+            DrawInstruction::Rectangle { color, .. } => color,
+            DrawInstruction::Square { color, .. } => color,
         }
     }
 

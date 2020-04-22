@@ -1,6 +1,8 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // main.rs - Program entry point
 
+#![allow(clippy::new_without_default)]
+
 pub mod draw;
 pub mod utils;
 
@@ -23,7 +25,7 @@ pub use script::*;
 
 use std::{
     env, fs,
-    io::{prelude::*, BufReader},
+    io::BufReader,
     process,
 };
 
@@ -38,16 +40,15 @@ fn main() {
 }
 
 fn classic_main() -> Result<(), LitError> {
-    let game = Game {};
-    let renderer = GlRenderer::init()?;
+    let mut renderer = GlRenderer::init()?;
     let mut data_file = BufReader::new(fs::File::open(
         env::args()
-            .skip(1)
-            .next()
+            .nth(1)
             .ok_or_else(|| LitError::NoDataFile)?,
     )?);
     let game_data = script::GameData::read(&mut data_file)?;
+    println!("{:?}", &game_data);
+    let game = Game::new(game_data);
 
-    println!("{:?}", game_data);
-    renderer.main_loop(&game)
+    renderer.main_loop(game)
 }

@@ -5,7 +5,7 @@ mod dictionary;
 
 pub use dictionary::ResourceDictionary;
 
-use crate::{BytecodeObject, Dependancy, LitError};
+use crate::{BytecodeObject, LitError};
 use std::collections::HashMap;
 
 /// An object that can be used to build resources.

@@ -99,7 +99,7 @@ impl ResourceDictionary {
 
     pub fn clean(&mut self) {
         // TODO: performance issues inbound!
-        let mut prev_loaded_ids = self.prev_loaded_ids.clone();
+        let prev_loaded_ids = self.prev_loaded_ids.clone();
 
         for i in prev_loaded_ids {
             if !self.loaded_ids.contains(&i) {

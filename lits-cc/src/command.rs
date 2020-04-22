@@ -8,7 +8,7 @@ use std::io::prelude::*;
 #[inline]
 fn write_word<T: Write>(stream: &mut T, word: u16) -> Result<(), LitsCcError> {
     let bytes = word.to_be_bytes();
-    stream.write(&bytes)?;
+    stream.write_all(&bytes)?;
     Ok(())
 }
 
@@ -22,7 +22,7 @@ pub fn read_ident<TStream: Write, TIter: Iterator<Item = TokenTree>>(
         Some(TokenTree::Ident(i)) => {
             let var_name = format!("{}", i);
             let id = state.register_variable(&var_name);
-            stream.write(&id.to_be_bytes())?;
+            stream.write_all(&id.to_be_bytes())?;
             Ok(())
         }
         _ => Err(LitsCcError::ExpectedIdent),

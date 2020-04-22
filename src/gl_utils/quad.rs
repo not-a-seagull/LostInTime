@@ -5,7 +5,7 @@ use super::vertices::QUAD_VERTICES;
 use gl::types::{GLfloat, GLint, GLuint};
 use std::{ffi::c_void, mem, ptr};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Quad {
     vao: GLuint,
     _vbo: GLuint,

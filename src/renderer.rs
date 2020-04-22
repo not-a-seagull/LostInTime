@@ -5,9 +5,10 @@ use crate::{Game, ImgTexture, LitError};
 use nalgebra::geometry::Point2;
 
 pub trait Renderer {
-    fn main_loop(&self, game: &Game) -> Result<(), LitError>;
+    fn main_loop(&mut self, game: Game) -> Result<(), LitError>;
     fn draw_sprite(
         &mut self,
+        img: &ImgTexture,
         position: Point2<f32>,
         size: Point2<f32>,
         rotation: f32,

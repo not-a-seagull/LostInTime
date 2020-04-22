@@ -4,7 +4,7 @@
 use super::{Shader, Uniform};
 use crate::LitError;
 use gl::types::{GLchar, GLint, GLuint};
-use std::{io::prelude::*, ptr};
+use std::ptr;
 
 pub struct Program {
     id: GLuint,

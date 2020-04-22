@@ -19,19 +19,19 @@ pub fn process_literals<TStream: Write, TIter: Iterator<Item = TokenTree>>(
 
                 if l.starts_with('"') && l.ends_with('"') {
                     // this is a string!
-                    let inner = l.split("\"").skip(1).next().unwrap();
-                    stream.write(&[4, inner.len() as u8])?;
-                    stream.write(inner.as_bytes())?;
+                    let inner = l.split('\"').nth(1).unwrap();
+                    stream.write_all(&[4, inner.len() as u8])?;
+                    stream.write_all(inner.as_bytes())?;
                 } else if let Ok(i) = l.parse::<i32>() {
                     if i >= std::u8::MIN as i32 && i <= std::u8::MAX as i32 {
-                        stream.write(&[1])?;
-                        stream.write(&[i as u8])?;
+                        stream.write_all(&[1])?;
+                        stream.write_all(&[i as u8])?;
                     } else if i >= std::i16::MIN as i32 && i <= std::i16::MAX as i32 {
-                        stream.write(&[2])?;
-                        stream.write(&(i as i16).to_be_bytes())?;
+                        stream.write_all(&[2])?;
+                        stream.write_all(&(i as i16).to_be_bytes())?;
                     } else {
-                        stream.write(&[3])?;
-                        stream.write(&i.to_be_bytes())?;
+                        stream.write_all(&[3])?;
+                        stream.write_all(&i.to_be_bytes())?;
                     }
                 } else {
                     return Err(LitsCcError::Msg(format!("Unexpected literal: {}", l)));
@@ -43,8 +43,8 @@ pub fn process_literals<TStream: Write, TIter: Iterator<Item = TokenTree>>(
                     match iter.next() {
                         Some(TokenTree::Ident(i)) => {
                             let name = format!("{}", i);
-                            stream.write(&[6])?;
-                            stream.write(&state.get_variable_id(&name)?.to_be_bytes())?;
+                            stream.write_all(&[6])?;
+                            stream.write_all(&state.get_variable_id(&name)?.to_be_bytes())?;
                         }
                         _ => {
                             return Err(LitsCcError::ExpectedIdent);
@@ -67,7 +67,7 @@ pub fn process_literals<TStream: Write, TIter: Iterator<Item = TokenTree>>(
                 let length = process_literals(&mut group_iter, &mut cursor, state)?;
 
                 cursor.seek(SeekFrom::Start(0))?;
-                stream.write(&[5, length as u8])?;
+                stream.write_all(&[5, length as u8])?;
 
                 // copy bytes from the cursor into the file
                 io::copy(&mut cursor, stream)?;

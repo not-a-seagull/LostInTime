@@ -2,7 +2,7 @@
 // script/eval.rs - Evaluate a bytecode statement
 
 use super::{Bytecode, BytecodeObject, GameData, ParserState};
-use crate::{Color, ImgMaterial, LitError};
+use crate::{ImgMaterial, LitError};
 use std::{convert::TryInto, io::prelude::*};
 
 pub fn eval<T: Read>(
@@ -12,7 +12,9 @@ pub fn eval<T: Read>(
 ) -> Result<bool, LitError> {
     // read a single word from the stream
     let mut buffer = [0; 2];
-    stream.read(&mut buffer)?;
+    if let Err(_e) = stream.read_exact(&mut buffer) {
+        return Ok(false);
+    }
     let res = u16::from_be_bytes(buffer);
 
     match res {
@@ -26,7 +28,7 @@ pub fn eval<T: Read>(
         2 => {
             // def statement, define a runtime variable
             let mut buffer = [0; 4];
-            stream.read(&mut buffer)?;
+            stream.read_exact(&mut buffer)?;
             let id = u32::from_be_bytes(buffer);
             state.register_variable(id, BytecodeObject::read(stream)?);
             Ok(true)
@@ -57,7 +59,7 @@ pub fn eval<T: Read>(
         4 => {
             // create a new texture material
             let mut buffer = [0; 4];
-            stream.read(&mut buffer)?;
+            stream.read_exact(&mut buffer)?;
             let id = u32::from_be_bytes(buffer);
 
             let width = BytecodeObject::read(stream)?;

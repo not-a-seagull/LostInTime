@@ -9,11 +9,10 @@ mod eval;
 mod types;
 pub use types::{BytecodeObject, DataType};
 
-use super::{Color, ImgMaterial, LitError, Material, MaterialType, ResourceDictionary};
+use super::{Color, ImgMaterial, LitError, Material, MaterialType, Resource, ResourceDictionary};
 use std::{
     collections::HashMap,
     io::prelude::*,
-    sync::{Arc, Mutex},
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -113,7 +112,9 @@ fn insert_material<T: Material>(
     let dep_ids: Vec<Result<u32, LitError>> = if let Some(deps) = dep_rels.get(&id) {
         deps.iter()
             .map(|dep| match dep.kind {
-                ImgMaterial => insert_material::<ImgMaterial>(rd, dep_rels, variables, dep.id),
+                MaterialType::ImgMaterial => {
+                    insert_material::<ImgMaterial>(rd, dep_rels, variables, dep.id)
+                }
             })
             .collect()
     } else {
@@ -161,6 +162,10 @@ impl GameData {
 
     pub fn set_name(&mut self, name: String) {
         self.name = name;
+    }
+
+    pub fn get_resource<T: Resource>(&mut self, id: u32) -> Result<&T, LitError> {
+        self.resource_dict.as_mut().unwrap().load_res(id)
     }
 }
 

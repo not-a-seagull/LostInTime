@@ -3,7 +3,7 @@
 
 use crate::utils::cify_str;
 use gl::types::GLuint;
-use nalgebra::{Matrix4, geometry::Transform3};
+use nalgebra::{geometry::Transform3, Matrix4};
 
 macro_rules! assign_uniform {
     ($id: expr, $name: expr => $call: ident <= $($val: expr),*) => {

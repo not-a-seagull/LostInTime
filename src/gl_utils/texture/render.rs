@@ -2,12 +2,12 @@
 // gl_utils/texture/render.rs - Convert a frame buffer to a texture.
 
 use super::{
-    super::{vertices::QUAD_VERTICES, FrameBuffer, Program, Quad, Shader, ShaderType},
-    DIBuffer, ImgMaterial, ImgTexture, Texture,
+    super::{FrameBuffer, Program, Quad, Shader, ShaderType},
+    ImgMaterial, ImgTexture, Texture,
 };
-use crate::{draw::DrawInstruction, utils::cify_str, LitError, Resource, ResourceDictionary};
-use gl::types::{GLfloat, GLint, GLuint, GLvoid};
-use std::{collections::HashMap, convert::TryFrom, ffi::c_void, mem, ptr};
+use crate::{LitError, Resource, ResourceDictionary};
+use gl::types::GLint;
+use std::{collections::HashMap, ptr};
 
 lazy_static::lazy_static! {
     static ref TEXTURE_RENDERER: Program = {

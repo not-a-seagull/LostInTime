@@ -6,7 +6,7 @@ mod instruction;
 pub use instruction::DrawInstruction;
 
 use crate::{Color, LitError};
-use std::{fmt, ops::Deref};
+use std::fmt;
 
 pub trait DrawHandle: fmt::Display + fmt::Debug {
     //    fn new(width: i16, height: i16, background_color: Color) -> Self;
