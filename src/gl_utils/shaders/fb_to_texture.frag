@@ -3,12 +3,12 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/shaders/fb_to_texture.frag - Calculate pixel color by calculating position in root image
 
-in ivec2 tex_coords;
+flat in ivec2 pix_coords;
 out vec4 color;
 
 uniform int s_draw_len;
-uniform sampler1d s_draws;
-uniform fvec4 bg_color;
+uniform isampler1D s_draws;
+uniform vec4 bg_color;
 
 void main() {
     color = bg_color; 

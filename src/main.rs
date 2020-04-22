@@ -23,11 +23,7 @@ pub use renderer::*;
 pub use resource::*;
 pub use script::*;
 
-use std::{
-    env, fs,
-    io::BufReader,
-    process,
-};
+use std::{env, fs, io::BufReader, process};
 
 fn main() {
     process::exit(match classic_main() {
@@ -42,13 +38,12 @@ fn main() {
 fn classic_main() -> Result<(), LitError> {
     let mut renderer = GlRenderer::init()?;
     let mut data_file = BufReader::new(fs::File::open(
-        env::args()
-            .nth(1)
-            .ok_or_else(|| LitError::NoDataFile)?,
+        env::args().nth(1).ok_or_else(|| LitError::NoDataFile)?,
     )?);
     let game_data = script::GameData::read(&mut data_file)?;
     println!("{:?}", &game_data);
-    let game = Game::new(game_data);
+    let mut game = Game::new(game_data);
+    println!("{:?}", game.get_resource::<ImgTexture>(0)?);
 
     renderer.main_loop(game)
 }

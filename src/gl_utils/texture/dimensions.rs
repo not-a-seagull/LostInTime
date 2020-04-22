@@ -1,7 +1,10 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/texture/dimensions.rs - Define traits and functions for texture dimensions
 
-use super::TextureType;
+use super::{
+    super::{check_gl_error, GlCall},
+    TextureType,
+};
 use crate::LitError;
 use gl::types::{GLbyte, GLenum, GLint};
 use std::ffi::c_void;
@@ -15,6 +18,11 @@ impl TextureType for DIBufferType {
     #[inline]
     fn bind_texture_location() -> GLenum {
         gl::TEXTURE_1D
+    }
+
+    #[inline]
+    fn tex_type() -> GLenum {
+        gl::INT
     }
 
     fn tex_image(dimensions: &[i16], data: *const GLint) -> Result<(), LitError> {
@@ -35,7 +43,7 @@ impl TextureType for DIBufferType {
             )
         };
 
-        Ok(())
+        check_gl_error(GlCall::TexImage1D)
     }
 }
 
@@ -48,6 +56,11 @@ impl TextureType for ImgTextureType {
     #[inline]
     fn bind_texture_location() -> GLenum {
         gl::TEXTURE_2D
+    }
+
+    #[inline]
+    fn tex_type() -> GLenum {
+        gl::FLOAT
     }
 
     fn tex_image(dimensions: &[i16], data: *const GLbyte) -> Result<(), LitError> {
@@ -69,6 +82,6 @@ impl TextureType for ImgTextureType {
             )
         };
 
-        Ok(())
+        check_gl_error(GlCall::TexImage2D)
     }
 }

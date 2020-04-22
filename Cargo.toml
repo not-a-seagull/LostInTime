@@ -5,6 +5,7 @@ authors = ["not_a_seagull <jtnunley01@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+log = "*"
 sdl2 = "0.33.0"
 gl = "0.14.0"
 nalgebra = "0.21.0"

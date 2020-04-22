@@ -2,7 +2,7 @@
 // gl_utils/texture/render.rs - Convert a frame buffer to a texture.
 
 use super::{
-    super::{FrameBuffer, Program, Quad, Shader, ShaderType},
+    super::{check_gl_error, FrameBuffer, GlCall, Program, Quad, Shader, ShaderType},
     ImgMaterial, ImgTexture, Texture,
 };
 use crate::{LitError, Resource, ResourceDictionary};
@@ -37,11 +37,11 @@ impl Resource for ImgTexture {
 
     fn load(mat: &ImgMaterial) -> Result<Self, LitError> {
         // create a frame buffer and a texture
-        let fb = FrameBuffer::new();
+        let fb = FrameBuffer::new()?;
         let tex = Texture::from_raw(&[mat.width(), mat.height()], ptr::null())?;
 
         // bind the frame buffer to the current context
-        fb.bind();
+        fb.bind()?;
 
         // bind the frame buffer to the texture
         unsafe {
@@ -53,29 +53,31 @@ impl Resource for ImgTexture {
                 0,
             )
         };
+        check_gl_error(GlCall::FramebufferTexture2D)?;
 
         unsafe { gl::Viewport(0, 0, mat.width() as GLint, mat.height() as GLint) };
+        check_gl_error(GlCall::Viewport)?;
 
-        let mut quad = Quad::new();
-        quad.bind();
+        let mut quad = Quad::new()?;
+        quad.bind()?;
 
-        TEXTURE_RENDERER.activate();
+        TEXTURE_RENDERER.activate()?;
 
         // set up uniforms
-        TEXTURE_RENDERER.set_uniform("s_width", mat.width() as GLint);
-        TEXTURE_RENDERER.set_uniform("s_height", mat.height() as GLint);
-        TEXTURE_RENDERER.set_uniform("s_draw_len", mat.draws().len() as GLint);
-        TEXTURE_RENDERER.set_uniform("bg_color", mat.background_color().as_gl_color());
+        TEXTURE_RENDERER.set_uniform("s_width", mat.width() as GLint)?;
+        TEXTURE_RENDERER.set_uniform("s_height", mat.height() as GLint)?;
+        TEXTURE_RENDERER.set_uniform("s_draw_len", mat.draws().len() as GLint)?;
+        TEXTURE_RENDERER.set_uniform("bg_color", mat.background_color().as_gl_color())?;
 
         // bind the DI buffer to the context
         let di_buffer = mat.buffer().unwrap();
-        di_buffer.bind();
+        di_buffer.bind()?;
 
-        quad.draw();
-        quad.unbind();
+        quad.draw()?;
+        quad.unbind()?;
 
-        di_buffer.unbind();
-        fb.unbind();
+        di_buffer.unbind()?;
+        fb.unbind()?;
 
         Ok(tex)
     }

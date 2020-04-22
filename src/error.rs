@@ -1,9 +1,13 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // error.rs - Error handling struct.
 
-use crate::script::{DataType, ParserState};
+use crate::{
+    script::{DataType, ParserState},
+    GlCall, GlErrorType,
+};
 use sdl2::video::WindowBuildError;
 use std::{
+    fmt,
     io::Error as IoError,
     num::TryFromIntError,
     string::FromUtf8Error,
@@ -17,6 +21,10 @@ pub enum LitError {
     Msg(String),
     #[error("{0}")]
     StaticMsg(&'static str),
+    #[error("A GL error occurred in {0:?}: {1:?}")]
+    GlError(GlCall, GlErrorType),
+    #[error("Uniform location not found: {0}")]
+    UniformNotFound(&'static str),
     #[error("An error occurred while building the SDL2 window: {0}")]
     WindowBuildError(#[from] WindowBuildError),
     #[error("Unexpected byte while reading bytecode: {0:X?}")]
@@ -54,5 +62,11 @@ pub enum LitError {
 impl<'a> From<PoisonError<MutexGuard<'a, ParserState>>> for LitError {
     fn from(_f: PoisonError<MutexGuard<'a, ParserState>>) -> Self {
         Self::PoisonedMutex
+    }
+}
+
+impl From<LitError> for fmt::Error {
+    fn from(_f: LitError) -> fmt::Error {
+        fmt::Error
     }
 }

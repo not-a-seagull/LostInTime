@@ -10,10 +10,7 @@ mod types;
 pub use types::{BytecodeObject, DataType};
 
 use super::{Color, ImgMaterial, LitError, Material, MaterialType, Resource, ResourceDictionary};
-use std::{
-    collections::HashMap,
-    io::prelude::*,
-};
+use std::{collections::HashMap, io::prelude::*};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Dependancy {

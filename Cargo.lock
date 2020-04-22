@@ -106,6 +106,7 @@ version = "0.1.0"
 dependencies = [
  "gl",
  "lazy_static",
+ "log",
  "nalgebra",
  "sdl2",
  "thiserror",

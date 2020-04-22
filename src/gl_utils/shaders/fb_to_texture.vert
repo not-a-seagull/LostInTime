@@ -5,7 +5,7 @@
 
 layout (location = 0) in vec4 vertex;
 
-out ivec2 pix_coords;
+flat out ivec2 pix_coords;
 
 uniform int s_width;
 uniform int s_height;

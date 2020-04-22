@@ -63,14 +63,18 @@ impl GlRenderer {
         let gl_context = window.gl_create_context().map_err(LitError::Msg)?;
         gl::load_with(|s| video_context.gl_get_proc_address(s) as *const c_void);
 
+        #[cfg(debug_assertions)]
+        crate::set_gl_error_callback()?;
+
         // initialize the sprite render process
         let ortho =
             Orthographic3::<GLfloat>::new(0.0, WIDTH as GLfloat, HEIGHT as GLfloat, 0.0, -1.0, 1.0);
-        SPRITE.set_uniform("ortho", ortho.into_inner());
+        SPRITE.activate()?;
+        SPRITE.set_uniform("ortho", ortho.into_inner())?;
 
-        let mut quad = Quad::new();
-        quad.bind();
-        quad.unbind();
+        let mut quad = Quad::new()?;
+        quad.bind()?;
+        quad.unbind()?;
 
         Ok(GlRenderer {
             sdl_context,
@@ -83,10 +87,7 @@ impl GlRenderer {
 
 impl Renderer for GlRenderer {
     fn main_loop(&mut self, mut game: Game) -> Result<(), LitError> {
-        let mut event_pump = self
-            .sdl_context
-            .event_pump()
-            .map_err(LitError::Msg)?;
+        let mut event_pump = self.sdl_context.event_pump().map_err(LitError::Msg)?;
 
         // set clear color
         unsafe { gl::ClearColor(1.0, 1.0, 1.0, 1.0) };
@@ -123,7 +124,7 @@ impl Renderer for GlRenderer {
         size: Point2<GLfloat>,
         rotation: GLfloat,
     ) -> Result<(), LitError> {
-        SPRITE.activate();
+        SPRITE.activate()?;
 
         let mut transform = Transform3::<GLfloat>::identity();
 
@@ -142,14 +143,14 @@ impl Renderer for GlRenderer {
             size.x, size.y, 1.0, 1.0,
         )));
 
-        SPRITE.set_uniform("transf", transform);
+        SPRITE.set_uniform("transf", transform)?;
 
         unsafe { gl::ActiveTexture(gl::TEXTURE0) };
-        img.bind();
+        img.bind()?;
 
-        self.quad.bind();
-        self.quad.draw();
-        self.quad.unbind();
+        self.quad.bind()?;
+        self.quad.draw()?;
+        self.quad.unbind()?;
 
         Ok(())
     }
