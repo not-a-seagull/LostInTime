@@ -40,6 +40,7 @@ pub enum GlCall {
     Uniform1i,
     Uniform4f,
     Uniform4fv,
+    UniformMatrix4fv,
     GetUniformLocation,
 }
 

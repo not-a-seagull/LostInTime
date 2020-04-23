@@ -51,7 +51,7 @@ impl TextureType for DIBufferType {
 pub struct ImgTextureType;
 
 impl TextureType for ImgTextureType {
-    type ValueType = GLbyte;
+    type ValueType = GLfloat;
 
     #[inline]
     fn bind_texture_location() -> GLenum {
@@ -63,7 +63,7 @@ impl TextureType for ImgTextureType {
         gl::FLOAT
     }
 
-    fn tex_image(dimensions: &[i16], data: *const GLbyte) -> Result<(), LitError> {
+    fn tex_image(dimensions: &[i16], data: *const GLfloat) -> Result<(), LitError> {
         if dimensions.len() != 2 {
             return Err(LitError::ImproperDimensions(2, dimensions.len()));
         }

@@ -92,8 +92,6 @@ impl<T: TextureType> fmt::Debug for Texture<T> {
             pixel_buffer.set_len(pixel_count);
         };
 
-        println!("{:?}", &pixel_buffer);
-
         write!(f, "[")?;
         for (i, pixel) in pixel_buffer.iter().enumerate() {
             write!(f, "{}", pixel)?;

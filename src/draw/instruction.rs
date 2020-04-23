@@ -99,7 +99,7 @@ impl DrawInstruction {
             color.r as i32,
             color.g as i32,
             color.b as i32,
-            if color.is_transparent { 1 } else { 0 },
+            if color.is_transparent { 0 } else { 1 },
         ]
     }
 }

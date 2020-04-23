@@ -130,11 +130,14 @@ impl Material for ImgMaterial {
             .rev()
             .for_each(|d| draws.extend(&d.as_int_set()));
 
+        println!("{:?}", &draws);
         // build a 1-dimensional texture for this instance
         self.buffer = Some(DIBuffer::from_raw(
-            &[self.draws().len() as i16],
+            &[(draws.len() / 4) as i16],
             draws.as_ptr(),
         )?);
+        println!("{:?}", self.buffer);
+
         Ok(())
     }
 }

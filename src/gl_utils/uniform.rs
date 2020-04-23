@@ -42,7 +42,7 @@ impl Uniform for [f32; 4] {
 impl Uniform for Matrix4<f32> {
     #[inline]
     fn set_uniform(self, uname: &'static str, prog_id: GLuint) -> Result<(), LitError> {
-        assign_uniform!(prog_id, uname => Uniform4fv <= 1, self.as_ptr())
+        assign_uniform!(prog_id, uname => UniformMatrix4fv <= 1, gl::FALSE, self.as_ptr())
     }
 }
 
