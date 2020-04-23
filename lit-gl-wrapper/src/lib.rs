@@ -1,5 +1,8 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// gl_utils/mod.rs - Define a single OpenGL shader
+// lit-gl-wrapper/lib.rs - OpenGL wrapper library
+
+extern crate gl;
+pub use gl;
 
 mod error;
 pub use error::*;

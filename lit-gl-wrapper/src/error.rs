@@ -5,6 +5,7 @@ use crate::LitError;
 use gl::types::{GLchar, GLenum, GLsizei, GLuint};
 use std::{
     ffi::{c_void, CStr},
+    fmt,
     ptr,
 };
 
@@ -56,11 +57,38 @@ pub enum GlErrorType {
     Unknown,
 }
 
-pub fn check_gl_error(call: GlCall) -> Result<(), LitError> {
-    let err = unsafe { gl::GetError() };
+#[derive(Debug, Clone)]
+pub struct GlError {
+    call: GlCall,
+    kind: GlErrorType,
+}
+
+impl GlError {
+    #[inline]
+    pub fn new(call: GlCall, kind: GlErrorType) -> GlError {
+        GlError { call, kind }
+    }
+
+    #[inline]
+    pub fn call(&self) -> GlCall { self.call }
+
+    #[inline]
+    pub fn kind(&self) -> GlErrorType { self.kind }
+}
+
+impl fmt::Display for GlError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "An OpenGl error occured in function {:?}: {:?}", self.call(), self.kind())
+    } 
+}
+
+impl Error for GlError {}
+
+pub fn check_gl_error(gl: &gl::Gl, call: GlCall) -> Result<(), GlError> {
+    let err = unsafe { gl.GetError() };
     match err {
         gl::NO_ERROR => Ok(()),
-        _ => Err(LitError::GlError(
+        _ => Err(GlError::new(
             call,
             match err {
                 gl::INVALID_ENUM => GlErrorType::InvalidEnum,
@@ -76,48 +104,4 @@ pub fn check_gl_error(call: GlCall) -> Result<(), LitError> {
     }
 }
 
-#[macro_export]
-macro_rules! gl_op {
-    ($eval: expr) => {{
-        let res = unsafe { $eval };
-        crate::check_gl_error()?;
-        Ok(res)
-    }};
-}
 
-// a callback to receive opengl errors
-#[cfg(debug_assertions)]
-extern "system" fn opengl_print_error(
-    _src: GLenum,
-    _ty: GLenum,
-    _id: GLuint,
-    _severity: GLenum,
-    _len: GLsizei,
-    msg: *const GLchar,
-    _user_param: *mut c_void,
-) {
-    let msg = unsafe { CStr::from_ptr(msg).to_string_lossy() };
-    println!("GL Error: {}", msg);
-}
-
-#[cfg(debug_assertions)]
-pub fn set_gl_error_callback() -> Result<(), LitError> {
-    unsafe {
-        gl::Enable(gl::DEBUG_OUTPUT_SYNCHRONOUS);
-        gl::DebugMessageCallback(Some(opengl_print_error), ptr::null());
-    };
-
-    let mut unused_ids: GLuint = 0;
-    unsafe {
-        gl::DebugMessageControl(
-            gl::DONT_CARE,
-            gl::DONT_CARE,
-            gl::DONT_CARE,
-            0,
-            &mut unused_ids,
-            gl::TRUE,
-        )
-    };
-
-    Ok(())
-}
