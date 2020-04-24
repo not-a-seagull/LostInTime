@@ -4,9 +4,6 @@
 extern crate gl;
 pub use gl;
 
-mod error;
-pub use error::*;
-
 mod frame_buffer;
 pub use frame_buffer::FrameBuffer;
 

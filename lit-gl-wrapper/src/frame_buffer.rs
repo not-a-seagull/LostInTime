@@ -1,7 +1,6 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// gl_utils/frame_buffer.rs - An OpenGL FrameBuffer
+// lit-gl-wrapper/src/frame_buffer.rs - An OpenGL FrameBuffer
 
-use super::{check_gl_error, GlCall, GlError};
 use gl::types::GLuint;
 
 #[derive(Debug, Default, Clone)]
@@ -11,11 +10,10 @@ pub struct FrameBuffer {
 }
 
 impl FrameBuffer {
-    pub fn new(gl: &gl::Gl) -> Result<Self, GlError> {
+    pub fn new(gl: &gl::Gl) -> Self {
         // generate open gl frame buffers
         let mut fbo: GLuint = 0;
         unsafe { gl.GenFramebuffers(1, &mut fbo) };
-        check_gl_error(gl, GlCall::GenFramebuffers)?;
 
         Ok(Self { gl: gl.clone(), fbo })
     }
@@ -25,14 +23,12 @@ impl FrameBuffer {
         self.fbo
     }
 
-    pub fn bind(&self) -> Result<(), GlError> {
+    pub fn bind(&self) { 
         unsafe { self.gl.BindFramebuffer(gl::FRAMEBUFFER, self.fbo()) };
-        check_gl_error(self.gl, GlCall::BindFramebuffer)
     }
 
-    pub fn unbind(&self) -> Result<(), LitError> {
+    pub fn unbind(&self) {
         unsafe { self.gl.BindFramebuffer(gl::FRAMEBUFFER, 0) };
-        check_gl_error(self.gl, GlCall::BindFramebuffer)
     }
 }
 

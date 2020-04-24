@@ -78,4 +78,4 @@ fn main() {
 }
 ```
 
-Now that we're using a struct-based context, let's go around and fix it for the `lit-gl-wrapper` crate. First, I created a real `GlError` struct.
+Now that we're using a struct-based context, let's go around and fix it for the `lit-gl-wrapper` crate. 

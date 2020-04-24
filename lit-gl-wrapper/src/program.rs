@@ -1,17 +1,18 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/program.rs - Define a single OpenGL shader
 
-use super::{check_gl_error, GlCall, Shader, Uniform};
+use super::{Shader, Uniform};
 use crate::LitError;
 use gl::types::{GLchar, GLint, GLuint};
 use std::ptr;
 
 pub struct Program {
+    gl: gl::Gl,
     id: GLuint,
 }
 
 impl Program {
-    pub fn new(shaders: &[Shader]) -> Result<Self, LitError> {
+    pub fn new(gl: &gl::Gl, shaders: &[Shader]) -> Result<Self, LitError> {
         // get the id
         let id = unsafe { gl::CreateProgram() };
 
