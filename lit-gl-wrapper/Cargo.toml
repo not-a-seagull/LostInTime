@@ -5,4 +5,7 @@ authors = ["not_a_seagull <jtnunley01@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-gl = { path = "../lit-gl" }
+nalgebra = "0.21.0"
+gl = { package = "lit-gl", path = "../lit-gl" }
+sdl2 = "0.33.0"
+thiserror = "1"

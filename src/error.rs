@@ -5,6 +5,7 @@ use crate::{
     script::{DataType, ParserState},
     GlCall, GlErrorType,
 };
+use lit_gl_wrapper::GlError;
 use sdl2::video::WindowBuildError;
 use std::{
     fmt,
@@ -21,12 +22,8 @@ pub enum LitError {
     Msg(String),
     #[error("{0}")]
     StaticMsg(&'static str),
-    #[error("A GL error occurred in {0:?}: {1:?}")]
-    GlError(GlCall, GlErrorType),
-    #[error("Uniform location not found: {0}")]
-    UniformNotFound(&'static str),
-    #[error("An error occurred while building the SDL2 window: {0}")]
-    WindowBuildError(#[from] WindowBuildError),
+    #[error("{0}")]
+    GlError(#[from] GlError),
     #[error("Unexpected byte while reading bytecode: {0:X?}")]
     BytecodeRead8(u8),
     #[error("Unexpected word while reading bytecode: {0:X?}")]
@@ -51,16 +48,12 @@ pub enum LitError {
     NoDataFile,
     #[error("Mutex has been poisoned - this is likely an internal issue")]
     PoisonedMutex,
-    #[error("Expected {0} dimensions, found {0}")]
-    ImproperDimensions(usize, usize),
-    #[error("No material with the ID {0} was found")]
-    MissingMaterial(u32),
     #[error("Conversion error: {0}")]
     TryFromInt(#[from] TryFromIntError),
 }
 
-impl<'a> From<PoisonError<MutexGuard<'a, ParserState>>> for LitError {
-    fn from(_f: PoisonError<MutexGuard<'a, ParserState>>) -> Self {
+impl<'a, T> From<PoisonError<MutexGuard<'a, T>>> for LitError {
+    fn from(_f: PoisonError<MutexGuard<'a, T>>) -> Self {
         Self::PoisonedMutex
     }
 }

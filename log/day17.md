@@ -1,10 +1,12 @@
-// Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// resource/mod.rs - Define resource dictionaries.
+# Day 17
 
-use super::Resource;
-use crate::{ImgTexture, LitError};
-use std::collections::HashMap;
+I went through and rewrote the `lit-gl-wrapper` crate to rely on structual GL context. This should help make things safer. I also went though the main crate and fixed it to rely on `lit-gl-wrapper`.
 
+Of note, I reworked the resource dictionary to load everything up front.
+
+*In src/resource/dictionary.md*
+
+```rust
 #[derive(Debug)]
 pub struct ResourceDictionary {
     next_id: u32,
@@ -46,3 +48,6 @@ impl ResourceDictionary {
         T::get_subdict(self).get(&id)
     }
 }
+```
+
+I also begun work on a draw buffer before I ended the day.

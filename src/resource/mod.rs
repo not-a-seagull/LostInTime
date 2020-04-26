@@ -5,30 +5,27 @@ mod dictionary;
 
 pub use dictionary::ResourceDictionary;
 
-use crate::{BytecodeObject, LitError};
+use crate::{BytecodeObject, ImgTexture, LitError};
 use std::collections::HashMap;
 
-/// An object that can be used to build resources.
-pub trait Material: Sized {
-    fn prepare(&mut self) -> Result<(), LitError>;
-    fn get_subdict(dict: &ResourceDictionary) -> &HashMap<u32, Self>;
-    fn get_subdict_mut(dict: &mut ResourceDictionary) -> &mut HashMap<u32, Self>;
-    fn from_bytecode_object(
-        bobj: BytecodeObject,
-        dependants: &[Result<u32, LitError>],
-    ) -> Result<Self, LitError>;
-}
-
 #[derive(Debug, Copy, Clone)]
-pub enum MaterialType {
-    ImgMaterial,
+pub enum ResourceType {
+    ImgTexture,
 }
 
 pub trait Resource: Sized {
-    type TMat: Material;
-
     fn get_subdict(dict: &ResourceDictionary) -> &HashMap<u32, Self>;
     fn get_subdict_mut(dict: &mut ResourceDictionary) -> &mut HashMap<u32, Self>;
+}
 
-    fn load(mat: &Self::TMat) -> Result<Self, LitError>;
+impl Resource for ImgTexture {
+    #[inline]
+    fn get_subdict(dict: &ResourceDictionary) -> &HashMap<u32, Self> {
+        dict.res_img_subdict()
+    }
+
+    #[inline]
+    fn get_subdict_mut(dict: &mut ResourceDictionary) -> &mut HashMap<u32, Self> {
+        dict.res_img_subdict_mut()
+    }
 }

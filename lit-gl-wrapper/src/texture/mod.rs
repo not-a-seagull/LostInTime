@@ -1,51 +1,58 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
 // gl_utils/texture/mod.rs - OpenGL texture
 
-use crate::{check_gl_error, GlCall, LitError};
+use crate::{check_gl_error, GlCall, GlError};
 use gl::types::{GLenum, GLuint};
 use std::{ffi::c_void, fmt, marker::PhantomData};
 
 mod dimensions;
-mod material;
-mod render;
 
 pub use dimensions::*;
-pub use material::*;
 
 pub trait TextureType: fmt::Debug {
     type ValueType: fmt::Debug + fmt::Display + Default;
 
     fn bind_texture_location() -> GLenum;
     fn tex_type() -> GLenum;
-    fn tex_image(dimensions: &[i16], data: *const Self::ValueType) -> Result<(), LitError>;
+    fn tex_image(
+        gl: &gl::Gl,
+        dimensions: &[u32],
+        data: *const Self::ValueType,
+    ) -> Result<(), GlError>;
 }
 
 #[derive(Clone)]
 pub struct Texture<T: TextureType> {
     id: GLuint,
-    dimensions: Vec<i16>,
+    dimensions: Vec<u32>,
+    gl: gl::Gl,
     _phantom: PhantomData<T>,
 }
 
 impl<T: TextureType> Texture<T> {
-    pub fn from_raw(dimensions: &[i16], data: *const T::ValueType) -> Result<Self, LitError> {
+    pub fn from_raw(
+        gl: &gl::Gl,
+        dimensions: &[u32],
+        data: *const T::ValueType,
+    ) -> Result<Self, GlError> {
         let mut id: GLuint = 0;
 
         // generate and bind the texture
-        unsafe { gl::GenTextures(1, &mut id) };
-        check_gl_error(GlCall::GenTextures)?;
-        unsafe { gl::BindTexture(T::bind_texture_location(), id) };
-        check_gl_error(GlCall::BindTexture)?;
+        unsafe { gl.GenTextures(1, &mut id) };
+        check_gl_error(gl, GlCall::GenTextures)?;
+        unsafe { gl.BindTexture(T::bind_texture_location(), id) };
+        check_gl_error(gl, GlCall::BindTexture)?;
 
         // fill the texture with the data
-        T::tex_image(dimensions, data)?;
+        T::tex_image(gl, dimensions, data)?;
 
-        unsafe { gl::BindTexture(T::bind_texture_location(), 0) };
-        check_gl_error(GlCall::BindTexture)?;
+        unsafe { gl.BindTexture(T::bind_texture_location(), 0) };
+        check_gl_error(gl, GlCall::BindTexture)?;
 
         Ok(Self {
             id,
             dimensions: dimensions.iter().copied().collect(),
+            gl: gl.clone(),
             _phantom: PhantomData,
         })
     }
@@ -55,31 +62,31 @@ impl<T: TextureType> Texture<T> {
         self.id
     }
 
-    pub fn bind(&self) -> Result<(), LitError> {
-        unsafe { gl::BindTexture(T::bind_texture_location(), self.id) };
-        check_gl_error(GlCall::BindTexture)
+    pub fn bind(&self) -> Result<(), GlError> {
+        unsafe { self.gl.BindTexture(T::bind_texture_location(), self.id) };
+        check_gl_error(&self.gl, GlCall::BindTexture)
     }
 
-    pub fn unbind(&self) -> Result<(), LitError> {
-        unsafe { gl::BindTexture(T::bind_texture_location(), 0) };
-        check_gl_error(GlCall::BindTexture)
+    pub fn unbind(&self) -> Result<(), GlError> {
+        unsafe { self.gl.BindTexture(T::bind_texture_location(), 0) };
+        check_gl_error(&self.gl, GlCall::BindTexture)
     }
 }
 
 impl<T: TextureType> Drop for Texture<T> {
     fn drop(&mut self) {
-        unsafe { gl::DeleteTextures(1, &self.id) };
+        unsafe { self.gl.DeleteTextures(1, &self.id) };
     }
 }
 
 impl<T: TextureType> fmt::Debug for Texture<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let pixel_count = (self.dimensions.iter().product::<i16>() * 4) as usize;
+        let pixel_count = (self.dimensions.iter().product::<u32>() * 4) as usize;
         let mut pixel_buffer: Vec<T::ValueType> = Vec::with_capacity(pixel_count);
         self.bind()?;
 
         unsafe {
-            gl::GetTexImage(
+            self.gl.GetTexImage(
                 T::bind_texture_location(),
                 0,
                 gl::RGBA,
@@ -87,7 +94,7 @@ impl<T: TextureType> fmt::Debug for Texture<T> {
                 pixel_buffer.as_mut_ptr() as *mut c_void,
             );
 
-            check_gl_error(GlCall::GetTexImage)?;
+            check_gl_error(&self.gl, GlCall::GetTexImage)?;
 
             pixel_buffer.set_len(pixel_count);
         };

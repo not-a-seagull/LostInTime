@@ -1,5 +1,5 @@
 // Licensed under the BSD 3-Clause License. See the LICENSE file in the repository root for more information.
-// utils.rs - Various utility functions.
+// lit-gl-wrapper/src/utils.rs - Useful GL utilities
 
 use gl::types::GLchar;
 use std::ffi::CString;

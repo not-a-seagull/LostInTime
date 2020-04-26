@@ -3,14 +3,13 @@
 
 #![allow(clippy::new_without_default)]
 
+pub use lit_gl_wrapper::*;
+
 pub mod draw;
-pub mod utils;
 
 mod color;
 mod error;
 mod game;
-mod gl_utils;
-mod renderer;
 mod resource;
 mod script;
 
@@ -18,7 +17,6 @@ pub use color::Color;
 pub use draw::*;
 pub use error::LitError;
 pub use game::Game;
-pub use gl_utils::*;
 pub use renderer::*;
 pub use resource::*;
 pub use script::*;

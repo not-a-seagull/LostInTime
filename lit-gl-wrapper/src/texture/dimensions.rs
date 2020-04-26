@@ -5,8 +5,8 @@ use super::{
     super::{check_gl_error, GlCall},
     TextureType,
 };
-use crate::LitError;
-use gl::types::{GLbyte, GLenum, GLint};
+use crate::GlError;
+use gl::types::{GLenum, GLfloat, GLint};
 use std::ffi::c_void;
 
 #[derive(Debug, Clone)]
@@ -25,13 +25,13 @@ impl TextureType for DIBufferType {
         gl::INT
     }
 
-    fn tex_image(dimensions: &[i16], data: *const GLint) -> Result<(), LitError> {
+    fn tex_image(gl: &gl::Gl, dimensions: &[u32], data: *const GLint) -> Result<(), GlError> {
         if dimensions.len() != 1 {
-            return Err(LitError::ImproperDimensions(1, dimensions.len()));
+            return Err(GlError::ImproperDimensions(1, dimensions.len()));
         }
 
         unsafe {
-            gl::TexImage1D(
+            gl.TexImage1D(
                 gl::TEXTURE_1D,
                 0,
                 gl::RGBA as GLint,
@@ -43,7 +43,7 @@ impl TextureType for DIBufferType {
             )
         };
 
-        check_gl_error(GlCall::TexImage1D)
+        check_gl_error(gl, GlCall::TexImage1D)
     }
 }
 
@@ -63,13 +63,13 @@ impl TextureType for ImgTextureType {
         gl::FLOAT
     }
 
-    fn tex_image(dimensions: &[i16], data: *const GLfloat) -> Result<(), LitError> {
+    fn tex_image(gl: &gl::Gl, dimensions: &[u32], data: *const GLfloat) -> Result<(), GlError> {
         if dimensions.len() != 2 {
-            return Err(LitError::ImproperDimensions(2, dimensions.len()));
+            return Err(GlError::ImproperDimensions(2, dimensions.len()));
         }
 
         unsafe {
-            gl::TexImage2D(
+            gl.TexImage2D(
                 gl::TEXTURE_2D,
                 0,
                 gl::RGBA as GLint,
@@ -82,6 +82,6 @@ impl TextureType for ImgTextureType {
             )
         };
 
-        check_gl_error(GlCall::TexImage2D)
+        check_gl_error(gl, GlCall::TexImage2D)
     }
 }

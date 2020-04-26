@@ -9,7 +9,7 @@ mod eval;
 mod types;
 pub use types::{BytecodeObject, DataType};
 
-use super::{Color, ImgMaterial, LitError, Material, MaterialType, Resource, ResourceDictionary};
+use super::{Color, ImgMaterial, LitError, Resource, ResourceType, ResourceDictionary};
 use std::{collections::HashMap, io::prelude::*};
 
 #[derive(Debug, Copy, Clone)]
@@ -99,7 +99,7 @@ impl ParserState {
 
 // helper function: insert resources for a certain type
 #[inline]
-fn insert_material<T: Material>(
+fn insert_material<T: Resource>(
     rd: &mut ResourceDictionary,
     dep_rels: &HashMap<u32, Vec<Dependancy>>,
     variables: &mut HashMap<u32, BytecodeObject>,
@@ -119,14 +119,14 @@ fn insert_material<T: Material>(
     };
 
     if let Some(mat) = variables.remove(&id) {
-        Ok(rd.add_mat(T::from_bytecode_object(mat, &dep_ids)?))
+        Ok(rd.add_res(T::from_bytecode_object(mat, &dep_ids)?))
     } else {
         Err(LitError::VariableNotFound(id))
     }
 }
 
 #[inline]
-fn insert_materials<T: Material>(
+fn insert_materials<T: Resource>(
     rd: &mut ResourceDictionary,
     dep_rels: &HashMap<u32, Vec<Dependancy>>,
     variables: &mut HashMap<u32, BytecodeObject>,
