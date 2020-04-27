@@ -6,7 +6,6 @@ use crate::{
     GlCall, GlErrorType,
 };
 use lit_gl_wrapper::GlError;
-use sdl2::video::WindowBuildError;
 use std::{
     fmt,
     io::Error as IoError,

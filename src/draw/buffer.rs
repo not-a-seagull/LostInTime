@@ -3,7 +3,7 @@
 
 use super::{DrawHandle, DrawInstruction};
 use crate::{Color, ImgTexture, LitError};
-use gl::types::GLfloat;
+use lit_gl_wrapper::gl::types::GLfloat;
 use std::convert::TryFrom;
 
 #[derive(Debug, Clone)]
